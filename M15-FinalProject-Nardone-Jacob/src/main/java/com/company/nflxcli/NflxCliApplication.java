@@ -71,7 +71,7 @@ public class NflxCliApplication {
 
 
 
-	private void printWeather(WeatherResponse response){
+	private void printWeatherData(WeatherResponse response){
 		System.out.println("Weather: " + response.weather[0].main + " ~ " + response.weather[0].description);
 		System.out.println("Temperature: " + response.main.temp + " °F");
 		System.out.println("Feels like: " + response.main.feels_like + " °F");
@@ -81,7 +81,7 @@ public class NflxCliApplication {
 
 
 
-	private void printLocationOfISS(SpaceResponse spaceResponse, WeatherResponse weatherResponse) {
+	private void printISSData(SpaceResponse spaceResponse, WeatherResponse weatherResponse) {
 		System.out.println("Latitude: " + spaceResponse.iss_position.latitude);
 		System.out.println("Longitude: " + spaceResponse.iss_position.longitude);
 		if (weatherResponse.sys.country == null)
@@ -92,7 +92,7 @@ public class NflxCliApplication {
 
 
 
-	private void printCryptoPrice(CryptoResponse[] cryptoResponse) {
+	private void printCryptoData(CryptoResponse[] cryptoResponse) {
 		System.out.println("Name: " + cryptoResponse[0].name);
 		System.out.println("ID: " + cryptoResponse[0].asset_id);
 		System.out.printf("Price: $%,.2f\n", Float.parseFloat(cryptoResponse[0].price_usd));
@@ -142,13 +142,16 @@ public class NflxCliApplication {
 
 
 	/**
-	 * Returns the crypto response of given asset
+	 * Returns the crypto response of a given asset
 	 * 
 	 */
-	private CryptoResponse[] getCryptoPrice(String assetName) throws BadRequestException {
-		return this.<CryptoResponse[]>request("https://rest.coinapi.io/v1/assets/" + assetName +
+	private CryptoResponse[] getCryptoData(String assetName) throws BadRequestException {
+		CryptoResponse[] cryptoResponse = this.<CryptoResponse[]>request("https://rest.coinapi.io/v1/assets/" + assetName +
 			"?apikey=" + coinApiKey,
 			CryptoResponse[].class); // @NOTE: CoinApi returns json wrapped entirely in a single array
+		if (cryptoResponse.length == 0) throw new BadRequestException("Error: The API request failed. " + 
+			"Unavailable or unknown asset ID was queried.");
+		else return cryptoResponse;
 	}
 
 
@@ -196,14 +199,16 @@ public class NflxCliApplication {
 				int choice = promptForNumberInRange(scanner, 1, i);
 
 				switch (choice){
+
 					case 1: { // Weather in a city
 						// Get city name from the user
 						System.out.print("\nPlease enter a city name: ");
 						WeatherResponse weatherResponse = getWeatherInCity(scanner.nextLine());
 
 						System.out.println("\n--- Current weather in " + weatherResponse.name + " ---");
-						printWeather(weatherResponse);
+						printWeatherData(weatherResponse);
 						break;
+
 
 					} case 2: { // Location of the ISS
 						SpaceResponse spaceResponse = getLocationISS();
@@ -211,8 +216,9 @@ public class NflxCliApplication {
 							spaceResponse.iss_position.longitude);
 
 						System.out.println("\n--- Current ISS location ---");
-						printLocationOfISS(spaceResponse, weatherResponse);
+						printISSData(spaceResponse, weatherResponse);
 						break;
+
 
 					} case 3: { // Location and weather at the ISS
 						SpaceResponse spaceResponse = getLocationISS();
@@ -221,20 +227,22 @@ public class NflxCliApplication {
 
 						System.out.println("\n--- Current ISS location and weather ---");
 						// display ISS location information first
-						printLocationOfISS(spaceResponse, weatherResponse);
+						printISSData(spaceResponse, weatherResponse);
 						// display weather at the ISS location
-						printWeather(weatherResponse);
+						printWeatherData(weatherResponse);
 						break;
+
 
 					} case 4: { // Current crypto prices
 						// Get a crypto asset name from the user
-						System.out.print("\nPlease enter a crypto asset name: ");
-						CryptoResponse[] cryptoResponse = getCryptoPrice(scanner.nextLine());
+						System.out.print("\nPlease enter a crypto asset ID: ");
+						CryptoResponse[] cryptoResponse = getCryptoData(scanner.nextLine());
 
 						System.out.println("\n--- Current data on " + cryptoResponse[0].asset_id + " ---");
 						// display that crypto's price info
-						printCryptoPrice(cryptoResponse);
+						printCryptoData(cryptoResponse);
 						break;
+
 
 					} case 5: { // Quit
 						System.out.println("\nQuiting program; may take a moment...");
