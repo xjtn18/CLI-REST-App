@@ -1,10 +1,10 @@
-# Makefile for java Maven Spring-boot projects
+# Makefile for Java Maven Spring-boot projects
 
 build:
-	@ mvn package
+	@ mvn compile
 
 run:
 	@ mvn spring-boot:run
 
 clean:
-	@ rm -rf target
+	@ mvn clean

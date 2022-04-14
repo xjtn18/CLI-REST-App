@@ -16,22 +16,17 @@ import java.util.InputMismatchException;
 @SpringBootApplication
 public class NflxCliApplication {
 
-	//Attributes
-	private WebClient client = null;
-
+	private final String weatherApiKey = "df5cfd59a9d48cfb1c016a0ae7d1ffef";
+	private final String coinApiKey = "33D50D5A-4308-456E-9060-45F05797217B";
 
 
 	// Custom exception classes
 	private class OutOfRangeException extends Exception {
-		public OutOfRangeException(String msg){
-			super(msg);
-		}
+		public OutOfRangeException(String msg){ super(msg); }
 	}
 
 	private class BadRequestException extends Exception {
-		public BadRequestException(String msg){
-			super(msg);
-		}
+		public BadRequestException(String msg){ super(msg); }
 	}
 
 
@@ -60,11 +55,11 @@ public class NflxCliApplication {
 		} catch (WebClientResponseException we){
 			int statusCode = we.getRawStatusCode();
 			if (statusCode >= 400 && statusCode < 500){
-				System.out.println("\nClient error occured.");
+				System.out.println("\nClient error occured. Invalid or unknown query. Please try again.");
 			} else if (statusCode >= 500 && statusCode < 600){
 				System.out.println("\nServer error occured.");
 			}
-			System.out.println(we.getMessage());
+			//System.out.println(we.getMessage());
 
 		} catch (Exception e) { // all other general exceptions
 			System.out.println("\nError: " + e.getMessage());
@@ -86,7 +81,7 @@ public class NflxCliApplication {
 
 
 
-	private void printLocationOfISS(SpaceResponse spaceResponse, WeatherResponse weatherResponse) throws BadRequestException {
+	private void printLocationOfISS(SpaceResponse spaceResponse, WeatherResponse weatherResponse) {
 		System.out.println("Latitude: " + spaceResponse.iss_position.latitude);
 		System.out.println("Longitude: " + spaceResponse.iss_position.longitude);
 		if (weatherResponse.sys.country == null)
@@ -97,7 +92,63 @@ public class NflxCliApplication {
 
 
 
-	private void printCurrentCryptoPrices() throws BadRequestException {
+	private void printCryptoPrice(CryptoResponse[] cryptoResponse) {
+		System.out.println("Name: " + cryptoResponse[0].name);
+		System.out.println("ID: " + cryptoResponse[0].asset_id);
+		System.out.printf("Price: $%,.2f\n", Float.parseFloat(cryptoResponse[0].price_usd));
+	}
+
+
+
+	/**
+	 * Returns the weather response given a city
+	 * 
+	 */
+	private WeatherResponse getWeatherInCity(String cityName) throws BadRequestException {
+		// Request from the weather API passing in the given city name
+		return this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
+			"q=" + cityName +
+			"&units=imperial" +
+			"&appid=" + weatherApiKey,
+			WeatherResponse.class);
+	}
+
+
+
+	/**
+	 * Returns the weather response given coordinates
+	 * 
+	 */
+	private WeatherResponse getWeatherAtCoordinates(String latitude, String longitude) throws BadRequestException {
+		// Request from the weather API using the coordinates of the ISS to grab the city & country data, if it exists
+		return this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
+			"lat=" + latitude +
+			"&lon=" + longitude +
+			"&units=imperial" +
+			"&appid=" + weatherApiKey,
+			WeatherResponse.class);
+	}
+
+
+
+	/**
+	 * Returns the space response of the ISS
+	 * 
+	 */
+	private SpaceResponse getLocationISS() throws BadRequestException {
+		return this.<SpaceResponse>request("http://api.open-notify.org/iss-now.json", SpaceResponse.class);
+	}
+
+
+
+	/**
+	 * Returns the crypto response of given asset
+	 * 
+	 */
+	private CryptoResponse[] getCryptoPrice(String assetName) throws BadRequestException {
+		return this.<CryptoResponse[]>request("https://rest.coinapi.io/v1/assets/" + assetName +
+			"?apikey=" + coinApiKey,
+			CryptoResponse[].class); // @NOTE: CoinApi returns json wrapped entirely in a single array
 	}
 
 
@@ -148,45 +199,25 @@ public class NflxCliApplication {
 					case 1: { // Weather in a city
 						// Get city name from the user
 						System.out.print("\nPlease enter a city name: ");
-						// Request from the weather API passing in the given city name
-						WeatherResponse weatherResponse = this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
-							"q=" + scanner.nextLine() +
-							"&units=imperial" +
-							"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
-							WeatherResponse.class);
+						WeatherResponse weatherResponse = getWeatherInCity(scanner.nextLine());
 
 						System.out.println("\n--- Current weather in " + weatherResponse.name + " ---");
 						printWeather(weatherResponse);
 						break;
 
 					} case 2: { // Location of the ISS
-						// Request from the ISS API to get its position
-						SpaceResponse spaceResponse = this.<SpaceResponse>request("http://api.open-notify.org/iss-now.json",
-							SpaceResponse.class);
-
-						// Request from the weather API using the coordinates of the ISS to grab the city & country data, if it exists
-						WeatherResponse weatherResponse = this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
-							"lat=" + spaceResponse.iss_position.latitude +
-							"&lon=" + spaceResponse.iss_position.longitude +
-							"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
-							WeatherResponse.class);
+						SpaceResponse spaceResponse = getLocationISS();
+						WeatherResponse weatherResponse = getWeatherAtCoordinates(spaceResponse.iss_position.latitude,
+							spaceResponse.iss_position.longitude);
 
 						System.out.println("\n--- Current ISS location ---");
 						printLocationOfISS(spaceResponse, weatherResponse);
 						break;
 
 					} case 3: { // Location and weather at the ISS
-						// Request from the ISS API to get its position
-						SpaceResponse spaceResponse = this.<SpaceResponse>request("http://api.open-notify.org/iss-now.json",
-							SpaceResponse.class);
-
-						// Request from the weather API using the coordinates of the ISS to grab the weather data
-						WeatherResponse weatherResponse = this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
-							"lat=" + spaceResponse.iss_position.latitude +
-							"&lon=" + spaceResponse.iss_position.longitude +
-							"&units=imperial" +
-							"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
-							WeatherResponse.class);
+						SpaceResponse spaceResponse = getLocationISS();
+						WeatherResponse weatherResponse = getWeatherAtCoordinates(spaceResponse.iss_position.latitude,
+							spaceResponse.iss_position.longitude);
 
 						System.out.println("\n--- Current ISS location and weather ---");
 						// display ISS location information first
@@ -196,7 +227,13 @@ public class NflxCliApplication {
 						break;
 
 					} case 4: { // Current crypto prices
-						printCurrentCryptoPrices();
+						// Get a crypto asset name from the user
+						System.out.print("\nPlease enter a crypto asset name: ");
+						CryptoResponse[] cryptoResponse = getCryptoPrice(scanner.nextLine());
+
+						System.out.println("\n--- Current data on " + cryptoResponse[0].asset_id + " ---");
+						// display that crypto's price info
+						printCryptoPrice(cryptoResponse);
 						break;
 
 					} case 5: { // Quit
@@ -218,7 +255,6 @@ public class NflxCliApplication {
 			}
 
 		}
-
 	}
 
 

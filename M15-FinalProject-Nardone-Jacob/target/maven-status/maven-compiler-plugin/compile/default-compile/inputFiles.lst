@@ -1,4 +1,4 @@
-/home/xjtn18/dev/academia/NFLX-Bootcamp/FinalProject/M15-FinalProject-Nardone-Jacob/src/main/java/com/company/isstracker/CryptoResponse.java
-/home/xjtn18/dev/academia/NFLX-Bootcamp/FinalProject/M15-FinalProject-Nardone-Jacob/src/main/java/com/company/isstracker/SpaceResponse.java
-/home/xjtn18/dev/academia/NFLX-Bootcamp/FinalProject/M15-FinalProject-Nardone-Jacob/src/main/java/com/company/isstracker/IssTrackerApplication.java
-/home/xjtn18/dev/academia/NFLX-Bootcamp/FinalProject/M15-FinalProject-Nardone-Jacob/src/main/java/com/company/isstracker/WeatherResponse.java
+/home/xjtn18/dev/academia/NFLX-Bootcamp/FinalProject/M15-FinalProject-Nardone-Jacob/src/main/java/com/company/nflxcli/CryptoResponse.java
+/home/xjtn18/dev/academia/NFLX-Bootcamp/FinalProject/M15-FinalProject-Nardone-Jacob/src/main/java/com/company/nflxcli/WeatherResponse.java
+/home/xjtn18/dev/academia/NFLX-Bootcamp/FinalProject/M15-FinalProject-Nardone-Jacob/src/main/java/com/company/nflxcli/SpaceResponse.java
+/home/xjtn18/dev/academia/NFLX-Bootcamp/FinalProject/M15-FinalProject-Nardone-Jacob/src/main/java/com/company/nflxcli/NflxCliApplication.java
