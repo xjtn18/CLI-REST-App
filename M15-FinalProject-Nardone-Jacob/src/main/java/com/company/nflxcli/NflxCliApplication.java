@@ -76,6 +76,16 @@ public class NflxCliApplication {
 
 
 
+	private void printWeather(WeatherResponse response){
+		System.out.println("Weather: " + response.weather[0].main + " ~ " + response.weather[0].description);
+		System.out.println("Temperature: " + response.main.temp + " °F");
+		System.out.println("Feels like: " + response.main.feels_like + " °F");
+		System.out.println("Wind speed: " + response.wind.speed + " mph");
+		System.out.println("Humidity: " + response.main.humidity + " %");
+	}
+
+
+
 	private void printWeatherAtCity(String cityName) throws BadRequestException {
 		// Request from the weather API passing in the given city name
 		WeatherResponse response = this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
@@ -84,10 +94,8 @@ public class NflxCliApplication {
 			"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
 			WeatherResponse.class);
 
-		System.out.println("");
-		System.out.println("Weather: " + response.weather[0].main);
-		System.out.println("Description: " + response.weather[0].description);
-		System.out.println("Temperature: " + response.main.temp + "°F");
+		System.out.println("\n--- Current weather in " + cityName + " ---");
+		printWeather(response);
 	}
 
 
@@ -102,13 +110,13 @@ public class NflxCliApplication {
 			"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
 			WeatherResponse.class);
 
-		System.out.println("");
+		System.out.println("\n--- Current ISS location ---");
 		System.out.println("Latitude: " + spaceResponse.iss_position.latitude);
 		System.out.println("Longitude: " + spaceResponse.iss_position.longitude);
 		if (weatherResponse.sys.country == null)
-			System.out.println("Currently not above any country.");
+			System.out.println("(Currently not above any country)");
 		else
-			System.out.println("Currently above " + weatherResponse.name + ", " + weatherResponse.sys.country);
+			System.out.println("(Currently above " + weatherResponse.name + ", " + weatherResponse.sys.country + ")");
 	}
 
 
@@ -128,9 +136,9 @@ public class NflxCliApplication {
 			"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
 			WeatherResponse.class);
 
-		System.out.println("Weather: " + weatherResponse.weather[0].main);
-		System.out.println("Description: " + weatherResponse.weather[0].description);
-		System.out.println("Temperature: " + weatherResponse.main.temp + "°F");
+		// display weather at the ISS coordinates
+		System.out.println("\n--- Current ISS weather ---");
+		printWeather(weatherResponse);
 	}
 
 
@@ -171,7 +179,7 @@ public class NflxCliApplication {
 		// Main program command loop
 		while (running){
 			int i = 0;
-			System.out.println("\n\n-----------------------------------------------");
+			System.out.println("\n\n-----------------------------------------------------------");
 			System.out.println("[" + ++i + "] Get weather in a city");
 			System.out.println("[" + ++i + "] Get location of the ISS");
 			System.out.println("[" + ++i + "] Get weather in the location of the ISS");
