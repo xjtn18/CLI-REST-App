@@ -1,5 +1,4 @@
-package com.company.isstracker;
-
+package com.company.nflxcli;
 
 public class CryptoResponse {
 }

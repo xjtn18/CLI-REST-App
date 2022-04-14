@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.company</groupId>
-	<artifactId>iss-tracker</artifactId>
+	<artifactId>nflx-cli</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>iss-tracker</name>
-	<description>Demo project for Spring Boot</description>
+	<name>nflx-cli</name>
+	<description>NFLX CLI Final Project</description>
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>

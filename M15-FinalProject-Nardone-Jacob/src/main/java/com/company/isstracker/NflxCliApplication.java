@@ -1,4 +1,4 @@
-package com.company.isstracker;
+package com.company.nflxcli;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,7 +14,7 @@ import java.util.InputMismatchException;
 
 
 @SpringBootApplication
-public class IssTrackerApplication {
+public class NflxCliApplication {
 
 	//Attributes
 	private WebClient client = null;
@@ -41,9 +41,11 @@ public class IssTrackerApplication {
 	 * 
 	 * @param client - The WebClient object we use to make the API requests
 	 * @param responseClass - The '.class' of whatever response object type we want
-	 * @return The custom response object if the request was successful, else null.
+	 * @return The custom response object if the request was successful
 	 */
-	private <ResponseType> ResponseType request(WebClient client, Class<ResponseType> responseClass){
+	private <ResponseType> ResponseType request(WebClient client, Class<ResponseType> responseClass)
+		throws BadRequestException
+	{
 		ResponseType response = null;
 
 		try {
@@ -69,19 +71,27 @@ public class IssTrackerApplication {
 			System.out.println("\nError: " + e.getMessage());
 		}
 
+		if (response == null){
+			throw new BadRequestException("Error: The API request failed.");
+		}
+
 		return response;
 	}
 
 
 
-	private void weatherAtCity() throws BadRequestException {
-		String cityLatitude = "";
-		String cityLongitude = "";
-
+	private void weatherAtCity(String cityName) throws BadRequestException {
 		client = WebClient.create("https://api.openweathermap.org/data/2.5/weather?" +
-			"lat=" + cityLatitude +
-			"&lon=" + cityLongitude +
+			"q=" + cityName +
+			"&units=imperial" +
 			"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef");
+		// Map the final response into our custom response object
+		WeatherResponse response = this.<WeatherResponse>request(client, WeatherResponse.class);
+
+		System.out.println("");
+		System.out.println("Weather: " + response.weather[0].main);
+		System.out.println("Description: " + response.weather[0].description);
+		System.out.println("Tempurature: " + response.main.temp + "°F");
 	}
 
 
@@ -90,9 +100,6 @@ public class IssTrackerApplication {
 		// First get a response from the ISS API
 		client = WebClient.create("http://api.open-notify.org/iss-now.json");
 		SpaceResponse spaceResponse = this.<SpaceResponse>request(client, SpaceResponse.class);
-		if (spaceResponse == null){
-			throw new BadRequestException("Error: The API request failed.");
-		}
 
 		// Request from the weather API using the coordinates of the ISS
 		client = WebClient.create("https://api.openweathermap.org/data/2.5/weather?" +
@@ -103,9 +110,6 @@ public class IssTrackerApplication {
 
 		// Map the final response into our custom response object
 		WeatherResponse weatherResponse = this.<WeatherResponse>request(client, WeatherResponse.class);
-		if (weatherResponse == null){
-			throw new BadRequestException("Error: The API request failed.");
-		}
 
 		System.out.println("");
 		System.out.println("Weather: " + weatherResponse.weather[0].main);
@@ -118,9 +122,7 @@ public class IssTrackerApplication {
 	private void locationOfISS() throws BadRequestException {
 		client = WebClient.create("http://api.open-notify.org/iss-now.json");
 		SpaceResponse response = this.<SpaceResponse>request(client, SpaceResponse.class);
-		if (response == null){
-			throw new BadRequestException("Error: The API request failed.");
-		}
+
 		System.out.println("");
 		System.out.println("Latitude: " + response.iss_position.latitude);
 		System.out.println("Longitude: " + response.iss_position.longitude);
@@ -158,7 +160,7 @@ public class IssTrackerApplication {
 	 * Loop ends when user selects the 'quit' option.
 	 */
 	public void start() {
-		Scanner commandScanner = new Scanner(System.in);
+		Scanner scanner = new Scanner(System.in);
 		boolean running = true;
 
 		// Main program command loop
@@ -173,11 +175,12 @@ public class IssTrackerApplication {
 
 			try {
 				System.out.print("\nEnter the corresponding number of your selection: ");
-				int choice = promptForNumberInRange(commandScanner, 1, i);
+				int choice = promptForNumberInRange(scanner, 1, i);
 
 				switch (choice){
 					case 1: // Weather in a city
-						weatherAtCity();
+						System.out.print("\nPlease enter a city name: ");
+						weatherAtCity(scanner.nextLine());
 						break;
 
 					case 2: // Weather in the location of the iss
@@ -207,7 +210,7 @@ public class IssTrackerApplication {
 
 			if (running){
 				System.out.println("\n[press 'Enter' to continue]");
-				commandScanner.nextLine(); // wait for user to press Enter again before reprompting.
+				scanner.nextLine(); // wait for user to press Enter again before reprompting.
 			}
 
 		}
@@ -221,9 +224,9 @@ public class IssTrackerApplication {
 	 * Call system.exit when the main command loop is done.
 	 */
 	public static void main(String[] args) throws OutOfRangeException, BadRequestException {
-		SpringApplication.run(IssTrackerApplication.class, args);
+		SpringApplication.run(NflxCliApplication.class, args);
 
-		new IssTrackerApplication().start(); // run the program command loop
+		new NflxCliApplication().start(); // run the program command loop
 		System.exit(0);
 	}
 

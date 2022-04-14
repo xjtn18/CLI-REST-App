@@ -1,5 +1,4 @@
-package com.company.isstracker;
-
+package com.company.nflxcli;
 
 public class WeatherResponse {
 
@@ -7,7 +6,6 @@ public class WeatherResponse {
 	public static class Coordinate {
 		public String lon, lat;
 	}
-
 
 	public static class Weather {
 		public String id, main, description, icon;
