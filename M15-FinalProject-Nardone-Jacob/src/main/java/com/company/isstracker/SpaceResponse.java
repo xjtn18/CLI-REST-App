@@ -4,11 +4,11 @@ package com.company.isstracker;
 
 public class SpaceResponse {
 
-	public class Position {
+	public static class Coordinate {
 		public String longitude, latitude;
 	}
 
 	public String message;
 	public String timestamp;
-	public Position iss_position;
+	public Coordinate iss_position;
 }
