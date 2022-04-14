@@ -86,59 +86,13 @@ public class NflxCliApplication {
 
 
 
-	private void printWeatherAtCity(String cityName) throws BadRequestException {
-		// Request from the weather API passing in the given city name
-		WeatherResponse response = this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
-			"q=" + cityName +
-			"&units=imperial" +
-			"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
-			WeatherResponse.class);
-
-		System.out.println("\n--- Current weather in " + cityName + " ---");
-		printWeather(response);
-	}
-
-
-
-	private void printLocationOfISS() throws BadRequestException {
-		// Request from the ISS API to get its position
-		SpaceResponse spaceResponse = this.<SpaceResponse>request("http://api.open-notify.org/iss-now.json", SpaceResponse.class);
-		// Request from the weather API using the coordinates of the ISS to grab the city & country data, if it exists
-		WeatherResponse weatherResponse = this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
-			"lat=" + spaceResponse.iss_position.latitude +
-			"&lon=" + spaceResponse.iss_position.longitude +
-			"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
-			WeatherResponse.class);
-
-		System.out.println("\n--- Current ISS location ---");
+	private void printLocationOfISS(SpaceResponse spaceResponse, WeatherResponse weatherResponse) throws BadRequestException {
 		System.out.println("Latitude: " + spaceResponse.iss_position.latitude);
 		System.out.println("Longitude: " + spaceResponse.iss_position.longitude);
 		if (weatherResponse.sys.country == null)
 			System.out.println("(Currently not above any country)");
 		else
 			System.out.println("(Currently above " + weatherResponse.name + ", " + weatherResponse.sys.country + ")");
-	}
-
-
-
-	private void printWeatherAtISS() throws BadRequestException {
-		// Request from the ISS API to get its position
-		SpaceResponse spaceResponse = this.<SpaceResponse>request("http://api.open-notify.org/iss-now.json", SpaceResponse.class);
-
-		// display ISS location information first
-		printLocationOfISS();
-
-		// Request from the weather API using the coordinates of the ISS to grab the weather data
-		WeatherResponse weatherResponse = this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
-			"lat=" + spaceResponse.iss_position.latitude +
-			"&lon=" + spaceResponse.iss_position.longitude +
-			"&units=imperial" +
-			"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
-			WeatherResponse.class);
-
-		// display weather at the ISS coordinates
-		System.out.println("\n--- Current ISS weather ---");
-		printWeather(weatherResponse);
 	}
 
 
@@ -191,28 +145,65 @@ public class NflxCliApplication {
 				int choice = promptForNumberInRange(scanner, 1, i);
 
 				switch (choice){
-					case 1: // Weather in a city
+					case 1: { // Weather in a city
+						// Get city name from the user
 						System.out.print("\nPlease enter a city name: ");
-						printWeatherAtCity(scanner.nextLine());
+						// Request from the weather API passing in the given city name
+						WeatherResponse weatherResponse = this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
+							"q=" + scanner.nextLine() +
+							"&units=imperial" +
+							"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
+							WeatherResponse.class);
+
+						System.out.println("\n--- Current weather in " + weatherResponse.name + " ---");
+						printWeather(weatherResponse);
 						break;
 
-					case 2: // Weather in the location of the iss
-						printLocationOfISS();
+					} case 2: { // Location of the ISS
+						// Request from the ISS API to get its position
+						SpaceResponse spaceResponse = this.<SpaceResponse>request("http://api.open-notify.org/iss-now.json",
+							SpaceResponse.class);
+
+						// Request from the weather API using the coordinates of the ISS to grab the city & country data, if it exists
+						WeatherResponse weatherResponse = this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
+							"lat=" + spaceResponse.iss_position.latitude +
+							"&lon=" + spaceResponse.iss_position.longitude +
+							"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
+							WeatherResponse.class);
+
+						System.out.println("\n--- Current ISS location ---");
+						printLocationOfISS(spaceResponse, weatherResponse);
 						break;
 
-					case 3: // Location of the ISS
-						printWeatherAtISS();
+					} case 3: { // Location and weather at the ISS
+						// Request from the ISS API to get its position
+						SpaceResponse spaceResponse = this.<SpaceResponse>request("http://api.open-notify.org/iss-now.json",
+							SpaceResponse.class);
+
+						// Request from the weather API using the coordinates of the ISS to grab the weather data
+						WeatherResponse weatherResponse = this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
+							"lat=" + spaceResponse.iss_position.latitude +
+							"&lon=" + spaceResponse.iss_position.longitude +
+							"&units=imperial" +
+							"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
+							WeatherResponse.class);
+
+						System.out.println("\n--- Current ISS location and weather ---");
+						// display ISS location information first
+						printLocationOfISS(spaceResponse, weatherResponse);
+						// display weather at the ISS location
+						printWeather(weatherResponse);
 						break;
 
-					case 4: // Current crypto prices
+					} case 4: { // Current crypto prices
 						printCurrentCryptoPrices();
 						break;
 
-					case 5: // Quit
+					} case 5: { // Quit
 						System.out.println("\nQuiting program; may take a moment...");
 						running = false;
 						break;
-				}
+				}}
 
 			} catch (NumberFormatException | OutOfRangeException ioe){
 				System.out.println("\nError: Please enter a valid number between 1 and " + i + " inclusive.");
