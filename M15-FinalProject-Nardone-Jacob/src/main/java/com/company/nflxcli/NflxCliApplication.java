@@ -39,17 +39,16 @@ public class NflxCliApplication {
 	/**
 	 * Gets the response object of the type specified by the 'ResponseType'.
 	 * 
-	 * @param client - The WebClient object we use to make the API requests
+	 * @param uri - URI of the API request
 	 * @param responseClass - The '.class' of whatever response object type we want
 	 * @return The custom response object if the request was successful
 	 */
-	private <ResponseType> ResponseType request(WebClient client, Class<ResponseType> responseClass)
-		throws BadRequestException
-	{
+	private <ResponseType> ResponseType request(String uri, Class<ResponseType> responseClass) throws BadRequestException {
 		ResponseType response = null;
 
 		try {
 			// get the Mono response
+			WebClient client = WebClient.create(uri);
 			Mono<ResponseType> responseMono = client
 				.get()
 				.retrieve()
@@ -71,72 +70,78 @@ public class NflxCliApplication {
 			System.out.println("\nError: " + e.getMessage());
 		}
 
-		if (response == null){
-			throw new BadRequestException("Error: The API request failed.");
-		}
-
-		return response;
+		if (response == null) throw new BadRequestException("Error: The API request failed.");
+		else return response;
 	}
 
 
 
-	private void weatherAtCity(String cityName) throws BadRequestException {
-		client = WebClient.create("https://api.openweathermap.org/data/2.5/weather?" +
+	private void printWeatherAtCity(String cityName) throws BadRequestException {
+		// Request from the weather API passing in the given city name
+		WeatherResponse response = this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
 			"q=" + cityName +
 			"&units=imperial" +
-			"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef");
-		// Map the final response into our custom response object
-		WeatherResponse response = this.<WeatherResponse>request(client, WeatherResponse.class);
+			"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
+			WeatherResponse.class);
 
 		System.out.println("");
 		System.out.println("Weather: " + response.weather[0].main);
 		System.out.println("Description: " + response.weather[0].description);
-		System.out.println("Tempurature: " + response.main.temp + "°F");
+		System.out.println("Temperature: " + response.main.temp + "°F");
 	}
 
 
 
-	private void weatherAtISS() throws BadRequestException {
-		// First get a response from the ISS API
-		client = WebClient.create("http://api.open-notify.org/iss-now.json");
-		SpaceResponse spaceResponse = this.<SpaceResponse>request(client, SpaceResponse.class);
+	private void printLocationOfISS() throws BadRequestException {
+		// Request from the ISS API to get its position
+		SpaceResponse spaceResponse = this.<SpaceResponse>request("http://api.open-notify.org/iss-now.json", SpaceResponse.class);
+		// Request from the weather API using the coordinates of the ISS to grab the city & country data, if it exists
+		WeatherResponse weatherResponse = this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
+			"lat=" + spaceResponse.iss_position.latitude +
+			"&lon=" + spaceResponse.iss_position.longitude +
+			"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
+			WeatherResponse.class);
 
-		// Request from the weather API using the coordinates of the ISS
-		client = WebClient.create("https://api.openweathermap.org/data/2.5/weather?" +
+		System.out.println("");
+		System.out.println("Latitude: " + spaceResponse.iss_position.latitude);
+		System.out.println("Longitude: " + spaceResponse.iss_position.longitude);
+		if (weatherResponse.sys.country == null)
+			System.out.println("Currently not above any country.");
+		else
+			System.out.println("Currently above " + weatherResponse.name + ", " + weatherResponse.sys.country);
+	}
+
+
+
+	private void printWeatherAtISS() throws BadRequestException {
+		// Request from the ISS API to get its position
+		SpaceResponse spaceResponse = this.<SpaceResponse>request("http://api.open-notify.org/iss-now.json", SpaceResponse.class);
+
+		// display ISS location information first
+		printLocationOfISS();
+
+		// Request from the weather API using the coordinates of the ISS to grab the weather data
+		WeatherResponse weatherResponse = this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
 			"lat=" + spaceResponse.iss_position.latitude +
 			"&lon=" + spaceResponse.iss_position.longitude +
 			"&units=imperial" +
-			"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef");
+			"&appid=df5cfd59a9d48cfb1c016a0ae7d1ffef",
+			WeatherResponse.class);
 
-		// Map the final response into our custom response object
-		WeatherResponse weatherResponse = this.<WeatherResponse>request(client, WeatherResponse.class);
-
-		System.out.println("");
 		System.out.println("Weather: " + weatherResponse.weather[0].main);
 		System.out.println("Description: " + weatherResponse.weather[0].description);
-		System.out.println("Tempurature: " + weatherResponse.main.temp + "°F");
+		System.out.println("Temperature: " + weatherResponse.main.temp + "°F");
 	}
 
 
 
-	private void locationOfISS() throws BadRequestException {
-		client = WebClient.create("http://api.open-notify.org/iss-now.json");
-		SpaceResponse response = this.<SpaceResponse>request(client, SpaceResponse.class);
-
-		System.out.println("");
-		System.out.println("Latitude: " + response.iss_position.latitude);
-		System.out.println("Longitude: " + response.iss_position.longitude);
-	}
-
-
-
-	private void currentCryptoPrices() throws BadRequestException {
+	private void printCurrentCryptoPrices() throws BadRequestException {
 	}
 
 
 
 	/**
-	 * Gets input from user through the command line.
+	 * Prompts for integer in the specified range as input from user through the command line.
 	 * 
 	 * @param start - Start of the valid range
 	 * @param end - End of the valid range
@@ -168,8 +173,8 @@ public class NflxCliApplication {
 			int i = 0;
 			System.out.println("\n\n-----------------------------------------------");
 			System.out.println("[" + ++i + "] Get weather in a city");
-			System.out.println("[" + ++i + "] Get weather in the location of the ISS");
 			System.out.println("[" + ++i + "] Get location of the ISS");
+			System.out.println("[" + ++i + "] Get weather in the location of the ISS");
 			System.out.println("[" + ++i + "] Get current cryptocurrency prices");
 			System.out.println("[" + ++i + "] Quit");
 
@@ -180,19 +185,19 @@ public class NflxCliApplication {
 				switch (choice){
 					case 1: // Weather in a city
 						System.out.print("\nPlease enter a city name: ");
-						weatherAtCity(scanner.nextLine());
+						printWeatherAtCity(scanner.nextLine());
 						break;
 
 					case 2: // Weather in the location of the iss
-						weatherAtISS();
+						printLocationOfISS();
 						break;
 
 					case 3: // Location of the ISS
-						locationOfISS();
+						printWeatherAtISS();
 						break;
 
 					case 4: // Current crypto prices
-						currentCryptoPrices();
+						printCurrentCryptoPrices();
 						break;
 
 					case 5: // Quit
