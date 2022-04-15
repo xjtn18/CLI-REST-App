@@ -1,6 +1,6 @@
 package com.company.nflxcli;
 
-public class CryptoResponse {
+class CryptoResponse {
 
 	public String asset_id, name, price_usd;
 }

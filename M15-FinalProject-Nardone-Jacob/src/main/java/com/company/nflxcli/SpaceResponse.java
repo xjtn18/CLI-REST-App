@@ -1,7 +1,7 @@
 package com.company.nflxcli;
 
 
-public class SpaceResponse {
+class SpaceResponse {
 
 	public static class Coordinate {
 		public String longitude, latitude;

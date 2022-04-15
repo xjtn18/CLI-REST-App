@@ -1,7 +1,9 @@
 package com.company.nflxcli;
 
-public class WeatherResponse {
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+
+class WeatherResponse {
 
 	public static class Coordinate {
 		public String lon, lat;
@@ -24,13 +26,11 @@ public class WeatherResponse {
 		public String all;
 	}
 
-	// public class Rain {
-	// 	public String 1h, 3h;
-	// }
-
-	// public class Snow {
-	// 	public String 1h, 3h;
-	// }
+	public static class Precipitation {
+		 // attributes need @JsonProperty since their key starts with a digit
+		@JsonProperty("1h") public String _1h;
+		@JsonProperty("3h") public String _3h;
+	}
 
 	public static class Sys {
 		public String type, id, message, country, sunrise, sunset;
@@ -44,6 +44,7 @@ public class WeatherResponse {
 	public String visibility;
 	public Wind wind;
 	public Clouds clouds;
+	public Precipitation rain, snow;
 	public String dt;
 	public Sys sys;
 	public String timezone, id, name, cod;
