@@ -26,12 +26,13 @@ class ConsoleUI {
 	 * Prints the weather data of the given weather response.
 	 *	@param response - the weather response received from the request to OpenWeather.
 	 */
-	public static void printWeatherData(WeatherResponse response){
-		System.out.println("Weather: " + response.weather[0].main + " ~ " + response.weather[0].description);
-		System.out.println("Temperature: " + response.main.temp + " °F");
-		System.out.println("Feels like: " + response.main.feels_like + " °F");
-		System.out.println("Wind speed: " + response.wind.speed + " mph");
-		System.out.println("Humidity: " + response.main.humidity + " %");
+	public static void printWeatherData(WeatherResponse weatherResponse){
+		System.out.println("Weather: " + weatherResponse.weather[0].main + " ~ "
+				+ weatherResponse.weather[0].description);
+		System.out.println("Temperature: " + weatherResponse.main.temp + " °F");
+		System.out.println("Feels like: " + weatherResponse.main.feels_like + " °F");
+		System.out.println("Wind speed: " + weatherResponse.wind.speed + " mph");
+		System.out.println("Humidity: " + weatherResponse.main.humidity + " %");
 	}
 
 
@@ -54,7 +55,7 @@ class ConsoleUI {
 
 	/**
 	 * Prints the coin data of the given cryptocurrency response.
-	 *	@param response - the weather response received from the request to CoinAPI.
+	 *	@param cryptoResponse - the weather response received from the request to CoinAPI.
 	 */
 	public static void printCryptoData(CryptoResponse[] cryptoResponse){
 		System.out.println("Name: " + cryptoResponse[0].name);

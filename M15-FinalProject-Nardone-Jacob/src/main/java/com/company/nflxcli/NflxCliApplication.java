@@ -19,11 +19,11 @@ public class NflxCliApplication {
 
 
 	// Custom exception classes
-	private class OutOfRangeException extends Exception {
+	private static class OutOfRangeException extends Exception {
 		public OutOfRangeException(String msg){ super(msg); }
 	}
 
-	private class BadRequestException extends Exception {
+	private static class BadRequestException extends Exception {
 		public BadRequestException(String msg){ super(msg); }
 	}
 
@@ -98,7 +98,7 @@ public class NflxCliApplication {
 
 	/**
 	 * Returns the crypto response of a given asset.
-	 * @param assetName - The ID of the cryptocurreny we want info for.
+	 * @param assetID - The ID of the cryptocurrency we want info for.
 	 * @return A crypto response object.
 	 * @throws BadRequestException - if an unknown asset ID was queried through the coin API.
 	 */
@@ -216,21 +216,19 @@ public class NflxCliApplication {
 			} catch (WebClientResponseException wre){
 				int statusCode = wre.getRawStatusCode();
 				if (statusCode >= 400 && statusCode < 500){
-					System.out.println("\nClient error occured. Invalid or unknown query. Please try again.");
+					System.out.println("\nClient error occurred. Invalid or unknown query. Please try again.");
 				} else if (statusCode >= 500 && statusCode < 600){
-					System.out.println("\nServer error occured.");
+					System.out.println("\nServer error occurred.");
 				}
 
-			} catch (BadRequestException bre){
-				System.out.println("\nError: " + bre.getMessage());
-
-			} catch (Exception e) { // all other general exceptions
+			} catch (Exception e){
 				System.out.println("\nError: " + e.getMessage());
-			}	
+
+			}
 
 			if (running){
 				System.out.println("\n[press 'Enter' to continue]");
-				scanner.nextLine(); // wait for user to press Enter again before reprompting.
+				scanner.nextLine(); // wait for user to press Enter again before re-prompting.
 			}
 
 		}
@@ -239,13 +237,16 @@ public class NflxCliApplication {
 
 
 	/**
-	 * Instatiate the application class and start it.
+	 * Instantiate the application class and start it.
 	 * Call system.exit when the main command loop is done.
 	 */
 	public static void main(String[] args) {
 		SpringApplication.run(NflxCliApplication.class, args);
 
-		new NflxCliApplication().start(); // run the program command loop
+		NflxCliApplication app = new NflxCliApplication();
+		app.getWeatherInCity("New York"); // make a random API call to skip the cold start
+		app.start(); // start the program
+
 		System.exit(0);
 	}
 
