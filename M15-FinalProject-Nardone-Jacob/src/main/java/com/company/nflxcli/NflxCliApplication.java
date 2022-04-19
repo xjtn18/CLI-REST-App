@@ -140,12 +140,24 @@ public class NflxCliApplication {
 
 
 	/**
+	 * Makes a random API call to skip the cold start before the user's first request.
+	 */
+	private void skipColdStart(){
+		try { getWeatherInCity("New York"); }
+		catch (WebClientResponseException wre) { };
+	}
+
+
+
+	/**
 	 * Runs the main program command loop; asks users to select from a set of options.
 	 * Loop ends when user selects the 'quit' option.
 	 */
 	public void start() {
 		Scanner scanner = new Scanner(System.in);
 		boolean running = true;
+
+		skipColdStart();
 
 		// Main program command loop
 		while (running){
@@ -216,7 +228,7 @@ public class NflxCliApplication {
 			} catch (WebClientResponseException wre){
 				int statusCode = wre.getRawStatusCode();
 				if (statusCode >= 400 && statusCode < 500){
-					System.out.println("\nClient error occurred. Invalid or unknown query. Please try again.");
+					System.out.println("\nClient error occurred. Invalid or unknown query.");
 				} else if (statusCode >= 500 && statusCode < 600){
 					System.out.println("\nServer error occurred.");
 				}
@@ -243,10 +255,7 @@ public class NflxCliApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(NflxCliApplication.class, args);
 
-		NflxCliApplication app = new NflxCliApplication();
-		app.getWeatherInCity("New York"); // make a random API call to skip the cold start
-		app.start(); // start the program
-
+		new NflxCliApplication().start(); // start the program
 		System.exit(0);
 	}
 

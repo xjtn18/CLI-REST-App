@@ -32,7 +32,7 @@ class ConsoleUI {
 		System.out.println("Temperature: " + weatherResponse.main.temp + " °F");
 		System.out.println("Feels like: " + weatherResponse.main.feels_like + " °F");
 		System.out.println("Wind speed: " + weatherResponse.wind.speed + " mph");
-		System.out.println("Humidity: " + weatherResponse.main.humidity + " %");
+		System.out.println("Humidity: " + weatherResponse.main.humidity + "%");
 	}
 
 
@@ -60,7 +60,11 @@ class ConsoleUI {
 	public static void printCryptoData(CryptoResponse[] cryptoResponse){
 		System.out.println("Name: " + cryptoResponse[0].name);
 		System.out.println("ID: " + cryptoResponse[0].asset_id);
-		System.out.printf("Price: $%,.2f\n", Float.parseFloat(cryptoResponse[0].price_usd));
+		if (cryptoResponse[0].price_usd != null) {
+			System.out.printf("Price: $%,.2f\n", Float.parseFloat(cryptoResponse[0].price_usd));
+		} else {
+			System.out.println("Price: No price data found");
+		}
 	}
 
 }
