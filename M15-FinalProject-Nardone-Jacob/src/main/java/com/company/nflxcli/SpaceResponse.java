@@ -1,6 +1,11 @@
 package com.company.nflxcli;
 
 
+/**
+ * 
+ * The OpenNotify ISS info response class.
+ * 
+ */
 class SpaceResponse {
 
 	public static class Coordinate {

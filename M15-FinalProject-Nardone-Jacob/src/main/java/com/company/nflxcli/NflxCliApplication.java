@@ -14,8 +14,8 @@ import java.util.Scanner;
 @SpringBootApplication
 public class NflxCliApplication {
 
-	private final String weatherApiKey = "df5cfd59a9d48cfb1c016a0ae7d1ffef";
-	private final String coinApiKey = "33D50D5A-4308-456E-9060-45F05797217B";
+	private static final String weatherApiKey = "df5cfd59a9d48cfb1c016a0ae7d1ffef";
+	private static final String coinApiKey = "33D50D5A-4308-456E-9060-45F05797217B";
 
 
 	// Custom exception classes
@@ -32,14 +32,15 @@ public class NflxCliApplication {
 	/**
 	 * Gets the response object of the type specified by the 'ResponseType'.
 	 * 
-	 * @param uri - URI of the API request
-	 * @param responseClass - The '.class' of whatever response object type we want
-	 * @return The custom response object if the request was successful
+	 * @param uri - URI of the API request.
+	 * @param responseClass - The '.class' of whatever response object type we want.
+	 * @return The custom response object.
 	 */
 	private <ResponseType> ResponseType request(String uri, Class<ResponseType> responseClass){
-		// get the Mono response
+		// create the connection to the resource
 		WebClient client = WebClient.create(uri);
 
+		// get the Mono response
 		Mono<ResponseType> responseMono = client
 			.get()
 			.retrieve()
@@ -53,23 +54,26 @@ public class NflxCliApplication {
 
 
 	/**
-	 * Returns the weather response given a city
-	 * 
+	 * Returns the weather response of a given a city.
+	 * @param cityName - The city where we want weather data from.
+	 * @return A weather response object.
 	 */
 	private WeatherResponse getWeatherInCity(String cityName){
 		// Request from the weather API passing in the given city name
 		return this.<WeatherResponse>request("https://api.openweathermap.org/data/2.5/weather?" +
 			"q=" + cityName +
 			"&units=imperial" +
-			"&appid=" + weatherApiKey,
+			"&appid=" + NflxCliApplication.weatherApiKey,
 			WeatherResponse.class);
 	}
 
 
 
 	/**
-	 * Returns the weather response given coordinates
-	 * 
+	 * Returns the weather response at the given coordinates.
+	 * @param latitude - That latitude of our desired location.
+	 * @param longitude - The longitude of our desired location.
+	 * @return A weather response object.
 	 */
 	private WeatherResponse getWeatherAtCoordinates(String latitude, String longitude){
 		// Request from the weather API using the coordinates of the ISS to grab the city & country data, if it exists
@@ -77,15 +81,14 @@ public class NflxCliApplication {
 			"lat=" + latitude +
 			"&lon=" + longitude +
 			"&units=imperial" +
-			"&appid=" + weatherApiKey,
+			"&appid=" + NflxCliApplication.weatherApiKey,
 			WeatherResponse.class);
 	}
 
 
 
 	/**
-	 * Returns the space response of the ISS
-	 * 
+	 * Returns the space response of the ISS.
 	 */
 	private SpaceResponse getLocationISS(){
 		return this.<SpaceResponse>request("http://api.open-notify.org/iss-now.json", SpaceResponse.class);
@@ -94,15 +97,17 @@ public class NflxCliApplication {
 
 
 	/**
-	 * Returns the crypto response of a given asset
-	 * 
+	 * Returns the crypto response of a given asset.
+	 * @param assetName - The ID of the cryptocurreny we want info for.
+	 * @return A crypto response object.
+	 * @throws BadRequestException - if an unknown asset ID was queried through the coin API.
 	 */
-	private CryptoResponse[] getCryptoData(String assetName) throws BadRequestException {
-		if (assetName == "")
+	private CryptoResponse[] getCryptoData(String assetID) throws BadRequestException {
+		if (assetID == "")
 			throw new BadRequestException("Empty asset ID was queried.");
 
-		CryptoResponse[] cryptoResponse = this.<CryptoResponse[]>request("https://rest.coinapi.io/v1/assets/" + assetName +
-			"?apikey=" + coinApiKey,
+		CryptoResponse[] cryptoResponse = this.<CryptoResponse[]>request("https://rest.coinapi.io/v1/assets/" + assetID +
+			"?apikey=" + NflxCliApplication.coinApiKey,
 			CryptoResponse[].class); // @NOTE: CoinApi returns json wrapped entirely in a single array
 
 		if (cryptoResponse.length == 0)
@@ -116,6 +121,7 @@ public class NflxCliApplication {
 	/**
 	 * Prompts for integer in the specified range as input from user through the command line.
 	 * 
+	 * @param scanner - the Scanner object used to take input
 	 * @param start - Start of the valid range
 	 * @param end - End of the valid range
 	 * @return int representing the user's choice
@@ -144,7 +150,7 @@ public class NflxCliApplication {
 		// Main program command loop
 		while (running){
 			// display menu options to the user
-			Display.printMenu();
+			ConsoleUI.printMenu();
 
 			try {
 				// get user's selected option
@@ -159,7 +165,7 @@ public class NflxCliApplication {
 						WeatherResponse weatherResponse = getWeatherInCity(scanner.nextLine().trim());
 
 						System.out.println("\n--- Current weather in " + weatherResponse.name + " ---");
-						Display.printWeatherData(weatherResponse);
+						ConsoleUI.printWeatherData(weatherResponse);
 						break;
 
 
@@ -170,7 +176,7 @@ public class NflxCliApplication {
 							spaceResponse.iss_position.longitude);
 
 						System.out.println("\n--- Current ISS location ---");
-						Display.printISSData(spaceResponse, weatherResponse);
+						ConsoleUI.printISSData(spaceResponse, weatherResponse);
 						break;
 
 
@@ -181,9 +187,9 @@ public class NflxCliApplication {
 
 						System.out.println("\n--- Current ISS location and weather ---");
 						// display ISS location information first
-						Display.printISSData(spaceResponse, weatherResponse);
+						ConsoleUI.printISSData(spaceResponse, weatherResponse);
 						// display weather at the ISS location
-						Display.printWeatherData(weatherResponse);
+						ConsoleUI.printWeatherData(weatherResponse);
 						break;
 
 
@@ -194,7 +200,7 @@ public class NflxCliApplication {
 
 						System.out.println("\n--- Current data on " + cryptoResponse[0].asset_id + " ---");
 						// display that crypto's price info
-						Display.printCryptoData(cryptoResponse);
+						ConsoleUI.printCryptoData(cryptoResponse);
 						break;
 
 
@@ -236,7 +242,7 @@ public class NflxCliApplication {
 	 * Instatiate the application class and start it.
 	 * Call system.exit when the main command loop is done.
 	 */
-	public static void main(String[] args) throws OutOfRangeException, BadRequestException {
+	public static void main(String[] args) {
 		SpringApplication.run(NflxCliApplication.class, args);
 
 		new NflxCliApplication().start(); // run the program command loop
@@ -244,3 +250,5 @@ public class NflxCliApplication {
 	}
 
 }
+
+

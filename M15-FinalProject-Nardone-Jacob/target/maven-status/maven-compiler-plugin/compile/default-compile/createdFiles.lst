@@ -1,5 +1,5 @@
 com/company/nflxcli/WeatherResponse$Coordinate.class
-com/company/nflxcli/Display.class
+com/company/nflxcli/ConsoleUI.class
 com/company/nflxcli/WeatherResponse$Precipitation.class
 com/company/nflxcli/WeatherResponse$Clouds.class
 com/company/nflxcli/NflxCliApplication$OutOfRangeException.class

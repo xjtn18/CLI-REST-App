@@ -3,6 +3,11 @@ package com.company.nflxcli;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
+/**
+ * 
+ * The OpenWeather weather info response class.
+ * 
+ */
 class WeatherResponse {
 
 	public static class Coordinate {

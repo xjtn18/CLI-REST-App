@@ -1,8 +1,17 @@
 package com.company.nflxcli;
 
 
-class Display {
+/**
+ * 
+ * glorified namespace to hold all the methods that print the main user facing elements of the application.
+ *
+ */
+class ConsoleUI {
 
+
+	/**
+	 * Prints the menu of the options that the user can choose from.
+	 */
 	public static void printMenu(){
 		System.out.println("\n\n-----------------------------------------------------------");
 		System.out.println("[1] Get weather in a city");
@@ -13,6 +22,10 @@ class Display {
 	}
 
 
+	/**
+	 * Prints the weather data of the given weather response.
+	 *	@param response - the weather response received from the request to OpenWeather.
+	 */
 	public static void printWeatherData(WeatherResponse response){
 		System.out.println("Weather: " + response.weather[0].main + " ~ " + response.weather[0].description);
 		System.out.println("Temperature: " + response.main.temp + " °F");
@@ -22,6 +35,11 @@ class Display {
 	}
 
 
+	/**
+	 * Prints the ISS location and the weather data at location of ISS given the both repsonses.
+	 *	@param spaceResponse - the ISS location response received from the request to OpenNotify.
+	 *	@param weatherResponse - the weather response received from the request to OpenWeather with the ISS coords.
+	 */
 
 	public static void printISSData(SpaceResponse spaceResponse, WeatherResponse weatherResponse){
 		System.out.println("Latitude: " + spaceResponse.iss_position.latitude);
@@ -34,6 +52,10 @@ class Display {
 
 
 
+	/**
+	 * Prints the coin data of the given cryptocurrency response.
+	 *	@param response - the weather response received from the request to CoinAPI.
+	 */
 	public static void printCryptoData(CryptoResponse[] cryptoResponse){
 		System.out.println("Name: " + cryptoResponse[0].name);
 		System.out.println("ID: " + cryptoResponse[0].asset_id);
