@@ -129,8 +129,8 @@ class ApiHandler {
 	 * @throws BadRequestException - if an unknown asset ID was queried through the coin API.
 	 */
 	public CryptoResponse getCryptoData(String assetID) throws BadRequestException {
-		if (assetID == "")
-			throw new BadRequestException("Empty asset ID was queried.");
+		// Empty asset path causes a WebClientException but with HTTP error code 200.. catching it early here.
+		if (assetID == "") throw new BadRequestException("Empty asset ID was queried.");
 
 		String uri = getCryptoUriBuilder()
 			.path(assetID)
@@ -139,10 +139,11 @@ class ApiHandler {
 		// @NOTE: CoinApi returns json wrapped entirely in a single array
 		CryptoResponse[] cryptoResponse = this.<CryptoResponse[]>request(uri, CryptoResponse[].class);
 
-		if (cryptoResponse.length == 0)
+		if (cryptoResponse.length == 0){
 			throw new BadRequestException("The API request failed; unknown asset ID was queried.");
-		else
+		} else {
 			return cryptoResponse[0];
+		}
 	}
 
 

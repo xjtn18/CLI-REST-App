@@ -32,17 +32,17 @@ public class NflxCliApplication {
 
 			try {
 				// get user's selected option
-				System.out.print("\nEnter the number of your selection: ");
+				System.out.print("\nEnter a number to select an option: ");
 				int choice = consoleIO.promptForNumberInRange(1, 5);
 
 				switch (choice){
 
 					case 1: { // Weather in a city
 						// Get city name from the user
-						System.out.print("\nPlease enter a city name: ");
+						System.out.print("Please enter a city name: ");
 						WeatherResponse weatherResponse = apiHandler.getWeatherInCity(consoleIO.promptForInput());
 
-						System.out.printf("\n--- Current weather in %s, %s ---\n",
+						System.out.printf("\n\n--- Current weather in %s, %s ---\n",
 							weatherResponse.name,
 							weatherResponse.sys.country);
 						consoleIO.printResponse(weatherResponse);
@@ -57,7 +57,7 @@ public class NflxCliApplication {
 							spaceResponse.iss_position.longitude
 							);
 
-						System.out.println("\n--- Current ISS location ---");
+						System.out.println("\n\n--- Current ISS location ---");
 						consoleIO.printResponse(spaceResponse, weatherResponse);
 						break;
 
@@ -70,7 +70,7 @@ public class NflxCliApplication {
 							);
 
 						// display ISS location information first, and then the weather at that location
-						System.out.println("\n--- Current ISS location and weather ---");
+						System.out.println("\n\n--- Current ISS location and weather ---");
 						consoleIO.printResponse(spaceResponse, weatherResponse);
 						consoleIO.printResponse(weatherResponse);
 						break;
@@ -78,17 +78,17 @@ public class NflxCliApplication {
 
 					} case 4: { // Current crypto prices
 						// Get a crypto asset name from the user
-						System.out.print("\nPlease enter a crypto asset ID: ");
+						System.out.print("Please enter a crypto asset ID: ");
 						CryptoResponse cryptoResponse = apiHandler.getCryptoData(consoleIO.promptForInput());
 
 						// display that crypto's price info
-						System.out.println("\n--- Current data on " + cryptoResponse.asset_id + " ---");
+						System.out.println("\n\n--- Current data on " + cryptoResponse.asset_id + " ---");
 						consoleIO.printResponse(cryptoResponse);
 						break;
 
 
 					} case 5: { // Quit
-						System.out.println("\nExiting program; may take a moment...");
+						System.out.println("Exiting program; may take a moment...");
 						running = false;
 						break;
 					}
@@ -111,7 +111,7 @@ public class NflxCliApplication {
 			}
 
 			if (running){
-				System.out.println("\n[press 'Enter' to continue]");
+				System.out.print("\n[press 'Enter' to continue] ");
 				consoleIO.promptForInput(); // wait for user to press Enter again before re-prompting.
 			}
 

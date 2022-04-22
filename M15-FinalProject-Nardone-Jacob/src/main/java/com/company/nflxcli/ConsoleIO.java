@@ -3,6 +3,7 @@ package com.company.nflxcli;
 import com.company.nflxcli.response.*;
 
 import java.util.Scanner;
+import java.util.Arrays;
 
 
 /**
@@ -23,12 +24,18 @@ class ConsoleIO {
 
 	// Methods
 
+	/**
+	 * Constructor
+	 */
 	public ConsoleIO(){
-		scanner = new Scanner(System.in);
+		scanner = new Scanner(System.in); // allocate the scanner for user input
 	}
 
 
 
+	/**
+	 * Returns a line of input from the user with leading & trailing whitespace removed.
+	 */
 	public String promptForInput(){
 		return scanner.nextLine().trim();
 	}
@@ -74,12 +81,15 @@ class ConsoleIO {
 	 *	@param response - the weather response received from the request to OpenWeather.
 	 */
 	public void printResponse(WeatherResponse weatherResponse){
-		System.out.println("Weather: " + weatherResponse.weather[0].main + " ~ "
-				+ weatherResponse.weather[0].description);
-		System.out.println("Temperature: " + weatherResponse.main.temp + " °F");
-		System.out.println("Feels like: " + weatherResponse.main.feels_like + " °F");
-		System.out.println("Wind speed: " + weatherResponse.wind.speed + " mph");
-		System.out.println("Humidity: " + weatherResponse.main.humidity + "%");
+		String[] params = new String[]{"Weather", "Temperature", "Feels like", "Wind speed", "Humidity"};
+		String[] values = new String[]{
+			weatherResponse.weather[0].main + " ~ " + weatherResponse.weather[0].description,
+			weatherResponse.main.temp + " °F",
+			weatherResponse.main.feels_like + " °F",
+			weatherResponse.wind.speed + " mph",
+			weatherResponse.main.humidity + "%"
+		};
+		displayTable(params, values);
 	}
 
 
@@ -90,12 +100,14 @@ class ConsoleIO {
 	 *	@param weatherResponse - the weather response received from the request to OpenWeather with the ISS coords.
 	 */
 	public void printResponse(SpaceResponse spaceResponse, WeatherResponse weatherResponse){
-		System.out.println("Latitude: " + spaceResponse.iss_position.latitude);
-		System.out.println("Longitude: " + spaceResponse.iss_position.longitude);
-		if (weatherResponse.sys.country == null)
-			System.out.println("(Currently not above any country)");
-		else
-			System.out.println("(Currently above " + weatherResponse.name + ", " + weatherResponse.sys.country + ")");
+		String[] params = new String[]{"Latitude", "Longitude", "Currently above"};
+		String[] values = new String[]{
+			spaceResponse.iss_position.latitude,
+			spaceResponse.iss_position.longitude,
+			(weatherResponse.sys.country == null)
+			? "(not above any country)" : weatherResponse.name + ", " + weatherResponse.sys.country
+		};
+		displayTable(params, values);
 	}
 
 
@@ -105,13 +117,48 @@ class ConsoleIO {
 	 *	@param cryptoResponse - the weather response received from the request to CoinAPI.
 	 */
 	public void printResponse(CryptoResponse cryptoResponse){
-		System.out.println("Name: " + cryptoResponse.name);
-		System.out.println("ID: " + cryptoResponse.asset_id);
-		if (cryptoResponse.price_usd != null) {
-			System.out.printf("Price: $%,.2f\n", Float.parseFloat(cryptoResponse.price_usd));
-		} else {
-			System.out.println("Price: No price data found");
+		String[] params = new String[]{"Name", "ID", "Price"};
+		String[] values = new String[]{
+			cryptoResponse.name,
+			cryptoResponse.asset_id,
+			(cryptoResponse.price_usd == null)
+			? "(no price data found)" : String.format("$%,.2f", Float.parseFloat(cryptoResponse.price_usd))
+		};
+		displayTable(params, values);
+	}
+
+
+
+	/**
+	 * Prints the coin data of the given cryptocurrency response.
+	 *	@param cryptoResponse - the weather response received from the request to CoinAPI.
+	 */
+	private int getWidth(String[] strings){
+		int widest = 0;
+		for (String s : strings) widest = Math.max(s.length(), widest);
+		return widest;
+	}
+
+
+
+	/**
+	 * 
+	 * Prints key-value pairs of data out to the command line in table format.
+	 * @param params - The keys as strings.
+	 * @param values - The values as strings.
+	 */
+	private void displayTable(String[] params, String[] values){
+		int widestParam = getWidth(params);
+		int widestValue = getWidth(values);
+		int lineWidth = widestParam + widestValue + 10;
+		char[] line = new char[lineWidth]; Arrays.fill(line, 1, lineWidth-1, '-'); line[0] = ' '; // horizontal line
+		String format = "| %" + widestParam + "s:  |  %-" + widestValue + "s |\n"; // table row format
+
+		System.out.println(line);
+		for (int i = 0; i < params.length; ++i){
+			System.out.printf(format, params[i], values[i]); // print row
 		}
+		System.out.println(line);
 	}
 
 }
