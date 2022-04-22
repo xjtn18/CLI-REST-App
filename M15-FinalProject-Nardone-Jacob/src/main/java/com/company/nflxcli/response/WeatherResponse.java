@@ -1,4 +1,4 @@
-package com.company.nflxcli;
+package com.company.nflxcli.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * The OpenWeather weather info response class.
  * 
  */
-class WeatherResponse {
+public class WeatherResponse {
 
 	public static class Coordinate {
 		public String lon, lat;

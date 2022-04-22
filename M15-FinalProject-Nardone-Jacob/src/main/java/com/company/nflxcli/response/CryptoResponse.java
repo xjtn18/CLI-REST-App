@@ -1,4 +1,4 @@
-package com.company.nflxcli;
+package com.company.nflxcli.response;
 
 
 /**
@@ -6,7 +6,7 @@ package com.company.nflxcli;
  * The CoinAPI cryptocurrency info response class.
  * 
  */
-class CryptoResponse {
+public class CryptoResponse {
 
 	public String asset_id, name, price_usd;
 }
