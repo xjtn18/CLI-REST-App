@@ -104,11 +104,11 @@ class ConsoleIO {
 	 * Prints the coin data of the given cryptocurrency response.
 	 *	@param cryptoResponse - the weather response received from the request to CoinAPI.
 	 */
-	public void printResponse(CryptoResponse[] cryptoResponse){
-		System.out.println("Name: " + cryptoResponse[0].name);
-		System.out.println("ID: " + cryptoResponse[0].asset_id);
-		if (cryptoResponse[0].price_usd != null) {
-			System.out.printf("Price: $%,.2f\n", Float.parseFloat(cryptoResponse[0].price_usd));
+	public void printResponse(CryptoResponse cryptoResponse){
+		System.out.println("Name: " + cryptoResponse.name);
+		System.out.println("ID: " + cryptoResponse.asset_id);
+		if (cryptoResponse.price_usd != null) {
+			System.out.printf("Price: $%,.2f\n", Float.parseFloat(cryptoResponse.price_usd));
 		} else {
 			System.out.println("Price: No price data found");
 		}

@@ -79,10 +79,10 @@ public class NflxCliApplication {
 					} case 4: { // Current crypto prices
 						// Get a crypto asset name from the user
 						System.out.print("\nPlease enter a crypto asset ID: ");
-						CryptoResponse[] cryptoResponse = apiHandler.getCryptoData(consoleIO.promptForInput());
+						CryptoResponse cryptoResponse = apiHandler.getCryptoData(consoleIO.promptForInput());
 
 						// display that crypto's price info
-						System.out.println("\n--- Current data on " + cryptoResponse[0].asset_id + " ---");
+						System.out.println("\n--- Current data on " + cryptoResponse.asset_id + " ---");
 						consoleIO.printResponse(cryptoResponse);
 						break;
 
