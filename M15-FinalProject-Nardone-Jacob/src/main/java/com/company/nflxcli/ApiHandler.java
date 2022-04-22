@@ -20,8 +20,8 @@ class ApiHandler {
 	
 
 	// Attributes
-	static final String weatherApiKey = "df5cfd59a9d48cfb1c016a0ae7d1ffef";
-	static final String coinApiKey = "33D50D5A-4308-456E-9060-45F05797217B";
+	private static final String weatherApiKey = "df5cfd59a9d48cfb1c016a0ae7d1ffef";
+	private static final String coinApiKey = "33D50D5A-4308-456E-9060-45F05797217B";
 
 	private WebClient client;
 
