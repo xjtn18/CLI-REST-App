@@ -14,38 +14,108 @@ import java.util.Scanner;
 @SpringBootApplication
 public class NflxCliApplication {
 
+	// Attributes
+	private ConsoleIO consoleIO;
+	private ApiHandler apiHandler;
+	private UnitStandard unitStandard;
+
+
+	// Methods
+
 	/**
-	 * Runs the main program command loop; asks users to select from a set of options.
+	 * Constructor
+	 */
+	NflxCliApplication(){
+		consoleIO = new ConsoleIO();
+		apiHandler = new ApiHandler();
+		unitStandard = UnitStandard.imperialStandard; // intialize to 'imperial' units
+	}
+
+
+
+	/**
+	 * Runs the settings menu loop.
+	 * Loop ends when the user selects the 'back' option.
+	 */
+	void settingsMenuLoop(){
+		boolean looping = true;
+
+		while (looping){
+			consoleIO.clearConsole();
+			consoleIO.printSettingsMenu(unitStandard); 
+
+
+			try {
+				int choice = consoleIO.promptForNumberInRange("\nEnter a number to select an option:", 0, 2);
+
+				switch (choice){
+					case 0: {
+						looping = false;
+						break;
+
+					} case 1: { // Change unit standard
+						unitStandard = (unitStandard == UnitStandard.imperialStandard)
+							? UnitStandard.metricStandard : UnitStandard.imperialStandard;
+						break;
+
+					} case 2: { // Change verbosity
+						consoleIO.toggleVerbosity();
+						break;
+					}
+				}
+
+			} catch (NumberFormatException nfe){
+				consoleIO.log("\nError: Please enter a number.");
+				consoleIO.promptForInput("\n[press 'Enter' to continue]"); // wait for user to press Enter again before re-prompting.
+
+			} catch (ConsoleIO.OutOfRangeException ore){
+				consoleIO.log("\nError: " + ore.getMessage());	
+				consoleIO.promptForInput("\n[press 'Enter' to continue]"); // wait for user to press Enter again before re-prompting.
+			}
+
+		}
+
+	}
+
+
+
+	/**
+	 * Runs the main menu loop.
 	 * Loop ends when user selects the 'quit' option.
 	 */
-	public void start() {
-		ConsoleIO consoleIO = new ConsoleIO();
-		ApiHandler apiHandler = new ApiHandler();
-
-		boolean running = true;
-
+	void mainMenuLoop() {
+		boolean looping = true;
 
 		// Main program command loop
-		while (running){
+		while (looping){
+			boolean backedOutSubMenu = false;
+
 			// display menu options to the user
-			consoleIO.printMenu();
+			consoleIO.clearConsole();
+			consoleIO.printMainMenu();
 
 			try {
 				// get user's selected option
-				System.out.print("\nEnter a number to select an option: ");
-				int choice = consoleIO.promptForNumberInRange(1, 5);
+				int choice = consoleIO.promptForNumberInRange("\nEnter a number to select an option:", 0, 5);
 
 				switch (choice){
+					case 0: { // Quit
+						looping = false;
+						consoleIO.log("Exiting program; may take a moment...");
+						break;
 
-					case 1: { // Weather in a city
+					} case 1: { // Weather in a city
 						// Get city name from the user
-						System.out.print("Please enter a city name: ");
-						WeatherResponse weatherResponse = apiHandler.getWeatherInCity(consoleIO.promptForInput());
+						WeatherResponse weatherResponse = apiHandler.getWeatherInCity(
+							consoleIO.promptForInput("Please enter a city name:"),
+							unitStandard.name
+						);
 
 						System.out.printf("\n\n--- Current weather in %s, %s ---\n",
 							weatherResponse.name,
-							weatherResponse.sys.country);
-						consoleIO.printResponse(weatherResponse);
+							weatherResponse.sys.country
+						);
+						consoleIO.printResponse(weatherResponse, unitStandard);
 						break;
 
 
@@ -54,10 +124,11 @@ public class NflxCliApplication {
 						// Get weather response data to check for a city & country that's below the ISS
 						WeatherResponse weatherResponse = apiHandler.getWeatherAtCoordinates(
 							spaceResponse.iss_position.latitude,
-							spaceResponse.iss_position.longitude
-							);
+							spaceResponse.iss_position.longitude,
+							unitStandard.name
+						);
 
-						System.out.println("\n\n--- Current ISS location ---");
+						consoleIO.log("\n\n--- Current ISS location ---");
 						consoleIO.printResponse(spaceResponse, weatherResponse);
 						break;
 
@@ -66,53 +137,55 @@ public class NflxCliApplication {
 						SpaceResponse spaceResponse = apiHandler.getLocationISS();
 						WeatherResponse weatherResponse = apiHandler.getWeatherAtCoordinates(
 							spaceResponse.iss_position.latitude,
-							spaceResponse.iss_position.longitude
-							);
+							spaceResponse.iss_position.longitude,
+							unitStandard.name
+						);
 
 						// display ISS location information first, and then the weather at that location
-						System.out.println("\n\n--- Current ISS location and weather ---");
+						consoleIO.log("\n\n--- Current ISS location and weather ---");
 						consoleIO.printResponse(spaceResponse, weatherResponse);
-						consoleIO.printResponse(weatherResponse);
+						consoleIO.printResponse(weatherResponse, unitStandard);
 						break;
 
 
 					} case 4: { // Current crypto prices
 						// Get a crypto asset name from the user
-						System.out.print("Please enter a crypto asset ID: ");
-						CryptoResponse cryptoResponse = apiHandler.getCryptoData(consoleIO.promptForInput());
+						CryptoResponse cryptoResponse = apiHandler.getCryptoData(
+							consoleIO.promptForInput("Please enter a crypto asset ID:")
+						);
 
 						// display that crypto's price info
-						System.out.println("\n\n--- Current data on " + cryptoResponse.asset_id + " ---");
+						consoleIO.log("\n\n--- Current data on " + cryptoResponse.asset_id + " ---");
 						consoleIO.printResponse(cryptoResponse);
 						break;
 
-
-					} case 5: { // Quit
-						System.out.println("Exiting program; may take a moment...");
-						running = false;
+					} case 5: { // Settings
+						settingsMenuLoop();
+						backedOutSubMenu = true;
 						break;
 					}
 				}
 
+			} catch (NumberFormatException nfe){
+				consoleIO.log("\nError: Please enter a number.");
 
-			} catch (NumberFormatException | ConsoleIO.OutOfRangeException ioe){
-				System.out.println("\nError: Please enter a valid number between 1 and 5 inclusive.");
+			} catch (ConsoleIO.OutOfRangeException ore){
+				consoleIO.log("\nError: " + ore.getMessage());
 
 			} catch (WebClientResponseException wre){
 				int statusCode = wre.getRawStatusCode();
 				if (statusCode >= 400 && statusCode < 500){
-					System.out.println("\nClient error occurred. Invalid or unknown query.");
+					consoleIO.log("\nClient error occurred. Invalid or unknown query.");
 				} else if (statusCode >= 500 && statusCode < 600){
-					System.out.println("\nServer error occurred.");
+					consoleIO.log("\nServer error occurred.");
 				}
 
-			} catch (Exception e){
-				System.out.println("\nError: " + e.getMessage());
+			} catch (Exception e){ // will catch any BadRequestExceptions
+				consoleIO.log("\nError: " + e.getMessage());
 			}
 
-			if (running){
-				System.out.print("\n[press 'Enter' to continue] ");
-				consoleIO.promptForInput(); // wait for user to press Enter again before re-prompting.
+			if (looping && !backedOutSubMenu){
+				consoleIO.promptForInput("\n[press 'Enter' to continue]"); // wait for user to press Enter again before re-prompting.
 			}
 
 		}
@@ -127,10 +200,9 @@ public class NflxCliApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(NflxCliApplication.class, args);
 
-		new NflxCliApplication().start(); // start the program
+		new NflxCliApplication().mainMenuLoop(); // start the program
 		System.exit(0);
 	}
 
 }
-
 

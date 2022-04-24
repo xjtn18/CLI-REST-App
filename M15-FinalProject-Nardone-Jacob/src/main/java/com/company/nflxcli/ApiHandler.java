@@ -17,7 +17,7 @@ class ApiHandler {
 	public static class BadRequestException extends Exception {
 		public BadRequestException(String msg){ super(msg); }
 	}
-	
+
 
 	// Attributes
 	private static final String weatherApiKey = "df5cfd59a9d48cfb1c016a0ae7d1ffef";
@@ -26,11 +26,16 @@ class ApiHandler {
 	private WebClient client;
 
 
+
 	// Methods
 
+	/**
+	 * Constructor
+	 */
 	public ApiHandler(){
 		warmup();
 	}
+
 
 
 	/**
@@ -42,7 +47,7 @@ class ApiHandler {
 	 */
 	private <ResponseType> ResponseType request(String uri, Class<ResponseType> responseClass){
 		// create the connection to the resource
-		client = WebClient.create(uri);
+		this.client = WebClient.create(uri);
 
 		// get the Mono response
 		Mono<ResponseType> responseMono = client
@@ -57,37 +62,13 @@ class ApiHandler {
 
 
 	/**
-	 * Gives us a weather URI component builder with the unchanging components already set.
-	 * @return A preset UriComponentsBuilder instance for weather requests.
-	 */
-	private UriComponentsBuilder getWeatherUriBuilder(){
-		return UriComponentsBuilder.newInstance()
-			.scheme("https").host("api.openweathermap.org")
-			.path("data/2.5/weather")
-			.queryParam("units", "imperial")
-			.queryParam("appid", weatherApiKey);
-	}
-
-	/**
-	 * Gives us a crypto URI component builder with the unchanging components already set.
-	 * @return A preset UriComponentsBuilder instance for crypto requests.
-	 */
-	private UriComponentsBuilder getCryptoUriBuilder(){
-		return UriComponentsBuilder.newInstance()
-			.scheme("https").host("rest.coinapi.io")
-			.path("v1/assets/")
-			.queryParam("apikey", coinApiKey);
-	}
-
-
-
-	/**
 	 * Returns the weather response of a given a city.
 	 * @param cityName - The city where we want weather data from.
+	 * @param units - The unit standard we want our response to use.
 	 * @return A weather response object.
 	 */
-	public WeatherResponse getWeatherInCity(String cityName){
-		String uri = getWeatherUriBuilder()
+	WeatherResponse getWeatherInCity(String cityName, String units){
+		String uri = getWeatherUriBuilder(units)
 			.queryParam("q", cityName)
 			.build().toUriString();
 
@@ -100,10 +81,11 @@ class ApiHandler {
 	 * Returns the weather response at the given coordinates.
 	 * @param latitude - That latitude of our desired location.
 	 * @param longitude - The longitude of our desired location.
+	 * @param units - The unit standard we want our response to use.
 	 * @return A weather response object.
 	 */
-	public WeatherResponse getWeatherAtCoordinates(String latitude, String longitude){
-		String uri = getWeatherUriBuilder()
+	WeatherResponse getWeatherAtCoordinates(String latitude, String longitude, String units){
+		String uri = getWeatherUriBuilder(units)
 			.queryParam("lat", latitude)
 			.queryParam("lon", longitude)
 			.build().toUriString();
@@ -116,7 +98,7 @@ class ApiHandler {
 	/**
 	 * Returns the space response of the ISS.
 	 */
-	public SpaceResponse getLocationISS(){
+	SpaceResponse getLocationISS(){
 		return this.<SpaceResponse>request("http://api.open-notify.org/iss-now.json", SpaceResponse.class);
 	}
 
@@ -128,7 +110,7 @@ class ApiHandler {
 	 * @return A crypto response object.
 	 * @throws BadRequestException - if an unknown asset ID was queried through the coin API.
 	 */
-	public CryptoResponse getCryptoData(String assetID) throws BadRequestException {
+	CryptoResponse getCryptoData(String assetID) throws BadRequestException {
 		// Empty asset path causes a WebClientException but with HTTP error code 200.. catching it early here.
 		if (assetID == "") throw new BadRequestException("Empty asset ID was queried.");
 
@@ -149,11 +131,39 @@ class ApiHandler {
 
 
 	/**
+	 * Gives us a weather URI component builder with the unchanging components already set.
+	 * @param units - The unit standard we want our response to use.
+	 * @return A preset UriComponentsBuilder instance for weather requests.
+	 */
+	private UriComponentsBuilder getWeatherUriBuilder(String units){
+		return UriComponentsBuilder.newInstance()
+			.scheme("https").host("api.openweathermap.org")
+			.path("data/2.5/weather")
+			.queryParam("units", units)
+			.queryParam("appid", weatherApiKey);
+	}
+
+
+	/**
+	 * Gives us a crypto URI component builder with the unchanging components already set.
+	 * @return A preset UriComponentsBuilder instance for crypto requests.
+	 */
+	private UriComponentsBuilder getCryptoUriBuilder(){
+		return UriComponentsBuilder.newInstance()
+			.scheme("https").host("rest.coinapi.io")
+			.path("v1/assets/")
+			.queryParam("apikey", coinApiKey);
+	}
+
+
+	/**
 	 * Makes a random API call to skip the cold start before the user's first request.
 	 */
 	private void warmup(){
-		try { getWeatherInCity("New York"); }
+		try { getLocationISS(); }
 		catch (WebClientResponseException wre) { };
 	}
+
+
 
 }
