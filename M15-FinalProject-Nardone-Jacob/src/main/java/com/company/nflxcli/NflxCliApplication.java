@@ -15,8 +15,8 @@ import java.util.Scanner;
 public class NflxCliApplication {
 
 	// Attributes
-	private ConsoleIO consoleIO;
-	private ApiHandler apiHandler;
+	private final ConsoleIO consoleIO;
+	private final ApiHandler apiHandler;
 	private UnitStandard unitStandard;
 
 
@@ -28,7 +28,7 @@ public class NflxCliApplication {
 	NflxCliApplication(){
 		consoleIO = new ConsoleIO();
 		apiHandler = new ApiHandler();
-		unitStandard = UnitStandard.imperialStandard; // intialize to 'imperial' units
+		unitStandard = UnitStandard.imperialStandard; // initialize to 'imperial' units
 	}
 
 
@@ -166,22 +166,22 @@ public class NflxCliApplication {
 					}
 				}
 
-			} catch (NumberFormatException nfe){
+			} catch (NumberFormatException e){
 				consoleIO.log("\nError: Please enter a number.");
 
-			} catch (ConsoleIO.OutOfRangeException ore){
-				consoleIO.log("\nError: " + ore.getMessage());
+			} catch (ConsoleIO.OutOfRangeException | ApiHandler.BadRequestException e){
+				consoleIO.log("\nError: " + e.getMessage());
 
-			} catch (WebClientResponseException wre){
-				int statusCode = wre.getRawStatusCode();
+			} catch (WebClientResponseException e){
+				int statusCode = e.getRawStatusCode();
 				if (statusCode >= 400 && statusCode < 500){
 					consoleIO.log("\nClient error occurred. Invalid or unknown query.");
 				} else if (statusCode >= 500 && statusCode < 600){
 					consoleIO.log("\nServer error occurred.");
 				}
 
-			} catch (Exception e){ // will catch any BadRequestExceptions
-				consoleIO.log("\nError: " + e.getMessage());
+			} catch (Exception e){
+				consoleIO.log("\nError: Unknown problem occurred.");
 			}
 
 			if (looping && !backedOutSubMenu){

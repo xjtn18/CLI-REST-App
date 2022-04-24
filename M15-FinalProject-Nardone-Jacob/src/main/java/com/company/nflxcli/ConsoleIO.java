@@ -18,7 +18,7 @@ class ConsoleIO {
 
 
 	// Attributes
-	private Scanner scanner;
+	private final Scanner scanner;
 	private boolean verbose;
 
 
@@ -30,7 +30,7 @@ class ConsoleIO {
 	 */
 	ConsoleIO(){
 		scanner = new Scanner(System.in); // allocate the scanner for user input
-		verbose = false; // intially set verbose to 'false'
+		verbose = false; // initially set verbose to 'false'
 	}
 
 
@@ -46,6 +46,7 @@ class ConsoleIO {
 
 	/**
 	 * Prints prompt and returns a line of input from the user with leading & trailing whitespace removed.
+	 * @param prompt - The prompt message string
 	 */
 	String promptForInput(String prompt){
 		System.out.print(prompt + " ");
@@ -56,7 +57,7 @@ class ConsoleIO {
 	/**
 	 * Prompts for integer in the specified range as input from user through the command line.
 	 * 
-	 * @param scanner - the Scanner object used to take input
+	 * @param prompt - The prompt message string
 	 * @param start - Start of the valid range
 	 * @param end - End of the valid range
 	 * @return int representing the user's choice
@@ -89,7 +90,7 @@ class ConsoleIO {
 	 * Clears the console.
 	 */
 	void clearConsole(){
-		System.out.print("\033\143");
+		//System.out.print("\033\143");
 	}
 
 
@@ -119,7 +120,6 @@ class ConsoleIO {
 		String optionMetric = (unitStandard == UnitStandard.metricStandard) ? "(metric)" : " metric";
 		log("[1] " + optionImperial + " : " + optionMetric);
 
-
 		String optionBrief = (!verbose) ? "  (brief) " : "   brief  ";
 		String optionVerbose = (verbose) ? "(verbose)" : " verbose";
 		log("[2] " + optionBrief + " : " + optionVerbose);
@@ -128,7 +128,8 @@ class ConsoleIO {
 
 	/**
 	 * Prints the weather data of the given weather response.
-	 *	@param response - the weather response received from the request to OpenWeather.
+	 *	@param weatherResponse - the weather response received from the request to OpenWeather.
+	 *	@param unitStandard - the unit standard used for displaying measurements.
 	 */
 	void printResponse(WeatherResponse weatherResponse, UnitStandard unitStandard){
 		String[] params = new String[]{"Weather", "Temperature", "Feels like", "Wind speed", "Humidity"};
@@ -145,9 +146,9 @@ class ConsoleIO {
 
 
 	/**
-	 * Prints the ISS coordinates and the city & country thats below it (if applicable) given weather and space response.
+	 * Prints the ISS coordinates and the city & country that's below it (if applicable) given weather and space response.
 	 *	@param spaceResponse - the ISS location response received from the request to OpenNotify.
-	 *	@param weatherResponse - the weather response received from the request to OpenWeather with the ISS coords.
+	 *	@param weatherResponse - the weather response received from the request to OpenWeather with the ISS coordinates.
 	 */
 	void printResponse(SpaceResponse spaceResponse, WeatherResponse weatherResponse){
 		String[] params = new String[]{"Latitude", "Longitude", "Currently above"};
@@ -181,7 +182,7 @@ class ConsoleIO {
 
 	/**
 	 * Gets the width of the widest string in an array.
-	 *	@param strings - An array of strings.
+	 * @param strings - An array of strings.
 	 * @return int representing the width of the widest string in the array.
 	 */
 	private int getWidth(String[] strings){

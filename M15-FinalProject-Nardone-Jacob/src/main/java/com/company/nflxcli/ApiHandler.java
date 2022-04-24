@@ -7,6 +7,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 
 /**
  * Handles the program's API requests.
@@ -22,8 +24,6 @@ class ApiHandler {
 	// Attributes
 	private static final String weatherApiKey = "df5cfd59a9d48cfb1c016a0ae7d1ffef";
 	private static final String coinApiKey = "33D50D5A-4308-456E-9060-45F05797217B";
-
-	private WebClient client;
 
 
 
@@ -47,7 +47,7 @@ class ApiHandler {
 	 */
 	private <ResponseType> ResponseType request(String uri, Class<ResponseType> responseClass){
 		// create the connection to the resource
-		this.client = WebClient.create(uri);
+		WebClient client = WebClient.create(uri);
 
 		// get the Mono response
 		Mono<ResponseType> responseMono = client
@@ -111,8 +111,8 @@ class ApiHandler {
 	 * @throws BadRequestException - if an unknown asset ID was queried through the coin API.
 	 */
 	CryptoResponse getCryptoData(String assetID) throws BadRequestException {
-		// Empty asset path causes a WebClientException but with HTTP error code 200.. catching it early here.
-		if (assetID == "") throw new BadRequestException("Empty asset ID was queried.");
+		// Empty asset path causes a WebClientException but with HTTP error code 200... catching it early here.
+		if (Objects.equals(assetID, "")) throw new BadRequestException("Empty asset ID was queried.");
 
 		String uri = getCryptoUriBuilder()
 			.path(assetID)
@@ -161,7 +161,7 @@ class ApiHandler {
 	 */
 	private void warmup(){
 		try { getLocationISS(); }
-		catch (WebClientResponseException wre) { };
+		catch (WebClientResponseException ignored) { };
 	}
 
 
