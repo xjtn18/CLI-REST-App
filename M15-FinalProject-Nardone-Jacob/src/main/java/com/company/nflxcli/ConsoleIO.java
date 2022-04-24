@@ -138,7 +138,7 @@ class ConsoleIO {
 			weatherResponse.main.temp + " " + unitStandard.temp,
 			weatherResponse.main.feels_like + " " + unitStandard.temp,
 			weatherResponse.wind.speed + " " + unitStandard.speed,
-			weatherResponse.main.humidity + "%"
+			weatherResponse.main.humidity + " %"
 		};
 		displayTable(params, values);
 	}
@@ -202,7 +202,13 @@ class ConsoleIO {
 		int widestParam = getWidth(params);
 		int widestValue = getWidth(values);
 		int lineWidth = widestParam + widestValue + 10;
-		char[] line = new char[lineWidth]; Arrays.fill(line, 1, lineWidth-1, '-'); line[0] = ' '; // horizontal line
+
+		// char array to store the horizontal lines of the table
+		char[] line = new char[lineWidth];
+		line[0] = ' ';
+		Arrays.fill(line, 1, lineWidth-1, '-');
+		line[lineWidth-1] = ' ';
+
 		String format = "| %" + widestParam + "s:  |  %-" + widestValue + "s |\n"; // table row format
 
 		System.out.println(line);

@@ -72,7 +72,7 @@ class ApiHandler {
 			.queryParam("q", cityName)
 			.build().toUriString();
 
-		return this.<WeatherResponse>request(uri, WeatherResponse.class);
+		return request(uri, WeatherResponse.class);
 	}
 
 
@@ -90,7 +90,7 @@ class ApiHandler {
 			.queryParam("lon", longitude)
 			.build().toUriString();
 
-		return this.<WeatherResponse>request(uri, WeatherResponse.class);
+		return request(uri, WeatherResponse.class);
 	}
 
 
@@ -99,7 +99,7 @@ class ApiHandler {
 	 * Returns the space response of the ISS.
 	 */
 	SpaceResponse getLocationISS(){
-		return this.<SpaceResponse>request("http://api.open-notify.org/iss-now.json", SpaceResponse.class);
+		return request("http://api.open-notify.org/iss-now.json", SpaceResponse.class);
 	}
 
 
@@ -119,7 +119,7 @@ class ApiHandler {
 			.build().toUriString();
 
 		// @NOTE: CoinApi returns json wrapped entirely in a single array
-		CryptoResponse[] cryptoResponse = this.<CryptoResponse[]>request(uri, CryptoResponse[].class);
+		CryptoResponse[] cryptoResponse = request(uri, CryptoResponse[].class);
 
 		if (cryptoResponse.length == 0){
 			throw new BadRequestException("The API request failed; unknown asset ID was queried.");
@@ -161,7 +161,7 @@ class ApiHandler {
 	 */
 	private void warmup(){
 		try { getLocationISS(); }
-		catch (WebClientResponseException ignored) { };
+		catch (WebClientResponseException ignored) { }
 	}
 
 

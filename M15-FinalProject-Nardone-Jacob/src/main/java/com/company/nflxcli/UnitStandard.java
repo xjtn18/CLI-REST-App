@@ -3,7 +3,7 @@ package com.company.nflxcli;
 
 class UnitStandard {
 
-	// Atributes
+	// Attributes
 	public static final UnitStandard imperialStandard = new UnitStandard("imperial", "mph", "°F");
 	public static final UnitStandard metricStandard = new UnitStandard("metric", "m/s", "°C");
 

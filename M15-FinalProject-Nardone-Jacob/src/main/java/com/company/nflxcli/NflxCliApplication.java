@@ -7,8 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import java.util.Scanner;
-
 
 
 @SpringBootApplication
@@ -46,7 +44,7 @@ public class NflxCliApplication {
 
 
 			try {
-				int choice = consoleIO.promptForNumberInRange("\nEnter a number to select an option:", 0, 2);
+				int choice = consoleIO.promptForNumberInRange("\nEnter a number to toggle a setting:", 0, 2);
 
 				switch (choice){
 					case 0: {
