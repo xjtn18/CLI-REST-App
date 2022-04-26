@@ -2,8 +2,8 @@ package com.company.nflxcli;
 
 import com.company.nflxcli.response.*;
 
-import java.util.Scanner;
-import java.util.Arrays;
+
+import java.util.*;
 
 
 /**
@@ -30,7 +30,7 @@ class ConsoleIO {
 	 */
 	ConsoleIO(){
 		scanner = new Scanner(System.in); // allocate the scanner for user input
-		verbose = false; // initially set verbose to 'false'
+		verbose = true; // initially set verbose to 'false'
 	}
 
 
@@ -90,7 +90,7 @@ class ConsoleIO {
 	 * Clears the console.
 	 */
 	void clearConsole(){
-		//System.out.print("\033\143");
+		//System.out.print("\033\143"); // Doesn't work on window's consoles; prints random symbol instead.
 	}
 
 
@@ -131,16 +131,43 @@ class ConsoleIO {
 	 *	@param weatherResponse - the weather response received from the request to OpenWeather.
 	 *	@param unitStandard - the unit standard used for displaying measurements.
 	 */
-	void printResponse(WeatherResponse weatherResponse, UnitStandard unitStandard){
-		String[] params = new String[]{"Weather", "Temperature", "Feels like", "Wind speed", "Humidity"};
-		String[] values = new String[]{
-			weatherResponse.weather[0].main + " ~ " + weatherResponse.weather[0].description,
-			weatherResponse.main.temp + " " + unitStandard.temp,
-			weatherResponse.main.feels_like + " " + unitStandard.temp,
-			weatherResponse.wind.speed + " " + unitStandard.speed,
-			weatherResponse.main.humidity + " %"
-		};
-		displayTable(params, values);
+	void printWeatherResponse(WeatherResponse weatherResponse, UnitStandard unitStandard){
+		List<AbstractMap.SimpleEntry<String, String>> pairList = new ArrayList<AbstractMap.SimpleEntry<String, String>>();
+
+		if (verbose){
+			pairList.add(new AbstractMap.SimpleEntry<>("Weather:", weatherResponse.weather[0].main + " ~ " + weatherResponse.weather[0].description));
+			pairList.add(new AbstractMap.SimpleEntry<>("Temperature:", weatherResponse.main.temp + " " + unitStandard.temp));
+			pairList.add(new AbstractMap.SimpleEntry<>("Temperature min:", weatherResponse.main.temp_min + " " + unitStandard.temp));
+			pairList.add(new AbstractMap.SimpleEntry<>("Temperature max:", weatherResponse.main.temp_max + " " + unitStandard.temp));
+			pairList.add(new AbstractMap.SimpleEntry<>("Feels like:", weatherResponse.main.feels_like + " " + unitStandard.temp));
+			if (weatherResponse.rain != null){
+				if (weatherResponse.rain._1h != null) pairList.add(new AbstractMap.SimpleEntry<>("Rainfall last hour:", weatherResponse.rain._1h + " mm"));
+				if (weatherResponse.rain._3h != null) pairList.add(new AbstractMap.SimpleEntry<>("Rainfall last 3 hours:", weatherResponse.rain._3h + " mm"));
+			}
+			if (weatherResponse.snow != null){
+				if (weatherResponse.snow._1h != null) pairList.add(new AbstractMap.SimpleEntry<>("Snowfall last hour:", weatherResponse.snow._1h + " mm"));
+				if (weatherResponse.snow._3h != null) pairList.add(new AbstractMap.SimpleEntry<>("Snowfall last 3 hours:", weatherResponse.snow._3h + " mm"));
+			}
+			pairList.add(new AbstractMap.SimpleEntry<>("Humidity:", weatherResponse.main.humidity + "%"));
+			pairList.add(new AbstractMap.SimpleEntry<>("Cloudiness:", weatherResponse.clouds.all + "%"));
+			pairList.add(new AbstractMap.SimpleEntry<>("Wind speed:", weatherResponse.wind.speed + " " + unitStandard.speed));
+			if (weatherResponse.wind.gust != null){
+				pairList.add(new AbstractMap.SimpleEntry<>("Gust:", weatherResponse.wind.gust + " " + unitStandard.speed));
+			}
+			pairList.add(new AbstractMap.SimpleEntry<>("Direction:", weatherResponse.wind.deg + "°"));
+			pairList.add(new AbstractMap.SimpleEntry<>("Pressure:", weatherResponse.main.pressure + " hPa"));
+			pairList.add(new AbstractMap.SimpleEntry<>("Visibility:", weatherResponse.visibility + " meters"));
+			pairList.add(new AbstractMap.SimpleEntry<>("Sunrise:", weatherResponse.sys.sunrise));
+			pairList.add(new AbstractMap.SimpleEntry<>("Sunset:", weatherResponse.sys.sunset));
+
+		} else {
+			pairList.add(new AbstractMap.SimpleEntry<>("Weather:", weatherResponse.weather[0].main + " ~ " + weatherResponse.weather[0].description));
+			pairList.add(new AbstractMap.SimpleEntry<>("Temperature:", weatherResponse.main.temp + " " + unitStandard.temp));
+			pairList.add(new AbstractMap.SimpleEntry<>("Wind speed:", weatherResponse.wind.speed + " " + unitStandard.speed));
+			pairList.add(new AbstractMap.SimpleEntry<>("Humidity:", weatherResponse.main.humidity + "%"));
+		}
+
+		displayTable(pairList);
 	}
 
 
@@ -150,14 +177,14 @@ class ConsoleIO {
 	 *	@param spaceResponse - the ISS location response received from the request to OpenNotify.
 	 *	@param weatherResponse - the weather response received from the request to OpenWeather with the ISS coordinates.
 	 */
-	void printResponse(SpaceResponse spaceResponse, WeatherResponse weatherResponse){
-		String[] params = new String[]{"Latitude", "Longitude", "Currently above"};
-		String[] values = new String[]{
+	void printSpaceResponse(SpaceResponse spaceResponse, WeatherResponse weatherResponse){
+		List<String> params = new ArrayList<>(Arrays.asList("Latitude", "Longitude", "Currently above"));
+		List<String> values = new ArrayList<>(Arrays.asList(
 			spaceResponse.iss_position.latitude,
 			spaceResponse.iss_position.longitude,
 			(weatherResponse.sys.country == null)
 			? "(not above any country)" : weatherResponse.name + ", " + weatherResponse.sys.country
-		};
+		));
 		displayTable(params, values);
 	}
 
@@ -167,14 +194,14 @@ class ConsoleIO {
 	 * Prints the coin data of the given cryptocurrency response.
 	 *	@param cryptoResponse - the weather response received from the request to CoinAPI.
 	 */
-	void printResponse(CryptoResponse cryptoResponse){
-		String[] params = new String[]{"Name", "ID", "Price"};
-		String[] values = new String[]{
+	void printCryptoResponse(CryptoResponse cryptoResponse){
+		List<String> params = new ArrayList<>(Arrays.asList("Name", "ID", "Price"));
+		List<String> values = new ArrayList<>(Arrays.asList(
 			cryptoResponse.name,
 			cryptoResponse.asset_id,
 			(cryptoResponse.price_usd == null)
 				? "(no price data found)" : String.format("$%,.2f", Float.parseFloat(cryptoResponse.price_usd))
-		};
+		));
 		displayTable(params, values);
 	}
 
@@ -185,7 +212,7 @@ class ConsoleIO {
 	 * @param strings - An array of strings.
 	 * @return int representing the width of the widest string in the array.
 	 */
-	private int getWidth(String[] strings){
+	private int getWidth(List<String> strings){
 		int widest = 0;
 		for (String s : strings) widest = Math.max(s.length(), widest);
 		return widest;
@@ -195,10 +222,34 @@ class ConsoleIO {
 
 	/**
 	 * Prints key-value pairs of data out to the command line in table format.
-	 * @param params - A string array of the first column.
-	 * @param values - A string array of the second column.
+	 * @param pairList - List of pairs representing the 2 columns of each row.
 	 */
-	private void displayTable(String[] params, String[] values){
+	private void displayTable(List<AbstractMap.SimpleEntry<String, String>> pairList){
+		int widestKey = 0, widestValue = 0;
+		// find the widest string in each column
+		for (AbstractMap.SimpleEntry<String,String> entry : pairList){
+			widestKey = Math.max(entry.getKey().length(), widestKey);
+			widestValue = Math.max(entry.getValue().length(), widestValue);
+		}
+		int lineWidth = widestKey + widestValue + 10;
+
+		// char array to store the horizontal lines of the table
+		char[] line = new char[lineWidth];
+		line[0] = ' ';
+		Arrays.fill(line, 1, lineWidth-1, '-');
+		line[lineWidth-1] = ' ';
+
+		String format = "| %" + widestKey + "s  |  %-" + widestValue + "s |\n"; // table row format
+
+		System.out.println(line);
+		for (AbstractMap.SimpleEntry<String,String> entry : pairList){
+			System.out.printf(format, entry.getKey(), entry.getValue()); // print row
+		}
+		System.out.println(line);
+	}
+
+
+	private void displayTable(List<String> params, List<String> values){
 		int widestParam = getWidth(params);
 		int widestValue = getWidth(values);
 		int lineWidth = widestParam + widestValue + 10;
@@ -209,14 +260,15 @@ class ConsoleIO {
 		Arrays.fill(line, 1, lineWidth-1, '-');
 		line[lineWidth-1] = ' ';
 
-		String format = "| %" + widestParam + "s:  |  %-" + widestValue + "s |\n"; // table row format
+		String format = "| %" + widestParam + "s  |  %-" + widestValue + "s |\n"; // table row format
 
 		System.out.println(line);
-		for (int i = 0; i < params.length; ++i){
-			System.out.printf(format, params[i], values[i]); // print row
+		for (int i = 0; i < params.size(); ++i){
+			System.out.printf(format, params.get(i), values.get(i)); // print row
 		}
 		System.out.println(line);
 	}
+
 
 }
 

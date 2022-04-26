@@ -113,7 +113,7 @@ public class NflxCliApplication {
 							weatherResponse.name,
 							weatherResponse.sys.country
 						);
-						consoleIO.printResponse(weatherResponse, unitStandard);
+						consoleIO.printWeatherResponse(weatherResponse, unitStandard);
 						break;
 
 
@@ -127,7 +127,7 @@ public class NflxCliApplication {
 						);
 
 						consoleIO.log("\n\n--- Current ISS location ---");
-						consoleIO.printResponse(spaceResponse, weatherResponse);
+						consoleIO.printSpaceResponse(spaceResponse, weatherResponse);
 						break;
 
 
@@ -141,8 +141,8 @@ public class NflxCliApplication {
 
 						// display ISS location information first, and then the weather at that location
 						consoleIO.log("\n\n--- Current ISS location and weather ---");
-						consoleIO.printResponse(spaceResponse, weatherResponse);
-						consoleIO.printResponse(weatherResponse, unitStandard);
+						consoleIO.printSpaceResponse(spaceResponse, weatherResponse);
+						consoleIO.printWeatherResponse(weatherResponse, unitStandard);
 						break;
 
 
@@ -154,7 +154,7 @@ public class NflxCliApplication {
 
 						// display that crypto's price info
 						consoleIO.log("\n\n--- Current data on " + cryptoResponse.asset_id + " ---");
-						consoleIO.printResponse(cryptoResponse);
+						consoleIO.printCryptoResponse(cryptoResponse);
 						break;
 
 					} case 5: { // Settings
@@ -173,13 +173,14 @@ public class NflxCliApplication {
 			} catch (WebClientResponseException e){
 				int statusCode = e.getRawStatusCode();
 				if (statusCode >= 400 && statusCode < 500){
-					consoleIO.log("\nClient error occurred. Invalid or unknown query.");
+					consoleIO.log("\nError: Invalid or unknown query.");
 				} else if (statusCode >= 500 && statusCode < 600){
-					consoleIO.log("\nServer error occurred.");
+					consoleIO.log("\nServer error occurred. Please try again later.");
 				}
 
 			} catch (Exception e){
 				consoleIO.log("\nError: Unknown problem occurred.");
+				consoleIO.log(e.getMessage());
 			}
 
 			if (looping && !backedOutSubMenu){
