@@ -2,9 +2,7 @@ package com.company.nflxcli.response;
 
 
 /**
- * 
  * The CoinAPI cryptocurrency info response class.
- * 
  */
 public class CryptoResponse {
 

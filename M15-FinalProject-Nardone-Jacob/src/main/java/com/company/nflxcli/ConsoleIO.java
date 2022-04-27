@@ -2,7 +2,9 @@ package com.company.nflxcli;
 
 import com.company.nflxcli.response.*;
 
-
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -11,7 +13,21 @@ import java.util.*;
  */ 
 class ConsoleIO {
 
-	// Custom exception classes
+	// Simple class for storing a pair of objects; used for the display tables.
+	private static class TableKeyValuePair <KeyType, ValueType> {
+		private final KeyType key;
+		private final ValueType value;
+
+		public TableKeyValuePair(KeyType key, ValueType value){
+			this.key = key;
+			this.value = value;
+		}
+
+		public KeyType getKey(){ return key; }
+		public ValueType getValue(){ return value; }
+	}
+
+	// Custom exception class for number inputs from the user that are outside the range of possible values.
 	public static class OutOfRangeException extends Exception {
 		public OutOfRangeException(String msg){ super(msg); }
 	}
@@ -25,12 +41,10 @@ class ConsoleIO {
 
 	// Methods
 
-	/**
-	 * Constructor
-	 */
+	/** Constructor */
 	ConsoleIO(){
 		scanner = new Scanner(System.in); // allocate the scanner for user input
-		verbose = true; // initially set verbose to 'false'
+		verbose = false; // initially set verbose to 'false'
 	}
 
 
@@ -52,6 +66,7 @@ class ConsoleIO {
 		System.out.print(prompt + " ");
 		return scanner.nextLine().trim();
 	}
+
 
 
 	/**
@@ -109,6 +124,7 @@ class ConsoleIO {
 	}
 
 
+
 	/**
 	 * Prints the settings menu of the options that the user can choose from.
 	 */
@@ -126,45 +142,47 @@ class ConsoleIO {
 	}
 
 
+
 	/**
 	 * Prints the weather data of the given weather response.
 	 *	@param weatherResponse - the weather response received from the request to OpenWeather.
 	 *	@param unitStandard - the unit standard used for displaying measurements.
 	 */
 	void printWeatherResponse(WeatherResponse weatherResponse, UnitStandard unitStandard){
-		List<AbstractMap.SimpleEntry<String, String>> pairList = new ArrayList<AbstractMap.SimpleEntry<String, String>>();
+		List<TableKeyValuePair<String, String>> pairList = new ArrayList<>();
 
 		if (verbose){
-			pairList.add(new AbstractMap.SimpleEntry<>("Weather:", weatherResponse.weather[0].main + " ~ " + weatherResponse.weather[0].description));
-			pairList.add(new AbstractMap.SimpleEntry<>("Temperature:", weatherResponse.main.temp + " " + unitStandard.temp));
-			pairList.add(new AbstractMap.SimpleEntry<>("Temperature min:", weatherResponse.main.temp_min + " " + unitStandard.temp));
-			pairList.add(new AbstractMap.SimpleEntry<>("Temperature max:", weatherResponse.main.temp_max + " " + unitStandard.temp));
-			pairList.add(new AbstractMap.SimpleEntry<>("Feels like:", weatherResponse.main.feels_like + " " + unitStandard.temp));
+			pairList.add(new TableKeyValuePair<>("Weather:", weatherResponse.weather[0].main + " ~ " + weatherResponse.weather[0].description));
+			pairList.add(new TableKeyValuePair<>("Temperature:", weatherResponse.main.temp + " " + unitStandard.temp));
+			pairList.add(new TableKeyValuePair<>("Temperature min:", weatherResponse.main.temp_min + " " + unitStandard.temp));
+			pairList.add(new TableKeyValuePair<>("Temperature max:", weatherResponse.main.temp_max + " " + unitStandard.temp));
+			pairList.add(new TableKeyValuePair<>("Feels like:", weatherResponse.main.feels_like + " " + unitStandard.temp));
 			if (weatherResponse.rain != null){
-				if (weatherResponse.rain._1h != null) pairList.add(new AbstractMap.SimpleEntry<>("Rainfall last hour:", weatherResponse.rain._1h + " mm"));
-				if (weatherResponse.rain._3h != null) pairList.add(new AbstractMap.SimpleEntry<>("Rainfall last 3 hours:", weatherResponse.rain._3h + " mm"));
+				if (weatherResponse.rain._1h != null) pairList.add(new TableKeyValuePair<>("Rainfall last hour:", weatherResponse.rain._1h + " mm"));
+				if (weatherResponse.rain._3h != null) pairList.add(new TableKeyValuePair<>("Rainfall last 3 hours:", weatherResponse.rain._3h + " mm"));
 			}
 			if (weatherResponse.snow != null){
-				if (weatherResponse.snow._1h != null) pairList.add(new AbstractMap.SimpleEntry<>("Snowfall last hour:", weatherResponse.snow._1h + " mm"));
-				if (weatherResponse.snow._3h != null) pairList.add(new AbstractMap.SimpleEntry<>("Snowfall last 3 hours:", weatherResponse.snow._3h + " mm"));
+				if (weatherResponse.snow._1h != null) pairList.add(new TableKeyValuePair<>("Snowfall last hour:", weatherResponse.snow._1h + " mm"));
+				if (weatherResponse.snow._3h != null) pairList.add(new TableKeyValuePair<>("Snowfall last 3 hours:", weatherResponse.snow._3h + " mm"));
 			}
-			pairList.add(new AbstractMap.SimpleEntry<>("Humidity:", weatherResponse.main.humidity + "%"));
-			pairList.add(new AbstractMap.SimpleEntry<>("Cloudiness:", weatherResponse.clouds.all + "%"));
-			pairList.add(new AbstractMap.SimpleEntry<>("Wind speed:", weatherResponse.wind.speed + " " + unitStandard.speed));
+			pairList.add(new TableKeyValuePair<>("Humidity:", weatherResponse.main.humidity + "%"));
+			pairList.add(new TableKeyValuePair<>("Cloudiness:", weatherResponse.clouds.all + "%"));
+			pairList.add(new TableKeyValuePair<>("Wind speed:", weatherResponse.wind.speed + " " + unitStandard.speed));
 			if (weatherResponse.wind.gust != null){
-				pairList.add(new AbstractMap.SimpleEntry<>("Gust:", weatherResponse.wind.gust + " " + unitStandard.speed));
+				pairList.add(new TableKeyValuePair<>("Gust:", weatherResponse.wind.gust + " " + unitStandard.speed));
 			}
-			pairList.add(new AbstractMap.SimpleEntry<>("Direction:", weatherResponse.wind.deg + "°"));
-			pairList.add(new AbstractMap.SimpleEntry<>("Pressure:", weatherResponse.main.pressure + " hPa"));
-			pairList.add(new AbstractMap.SimpleEntry<>("Visibility:", weatherResponse.visibility + " meters"));
-			pairList.add(new AbstractMap.SimpleEntry<>("Sunrise:", weatherResponse.sys.sunrise));
-			pairList.add(new AbstractMap.SimpleEntry<>("Sunset:", weatherResponse.sys.sunset));
+			pairList.add(new TableKeyValuePair<>("Direction:", weatherResponse.wind.deg + "°"));
+			pairList.add(new TableKeyValuePair<>("Pressure:", weatherResponse.main.pressure + " hPa"));
+			pairList.add(new TableKeyValuePair<>("Visibility:", weatherResponse.visibility + " meters"));
+
+			pairList.add(new TableKeyValuePair<>("Sunrise:", getMilitaryTimeUTC(Long.parseLong(weatherResponse.sys.sunrise))));
+			pairList.add(new TableKeyValuePair<>("Sunrise:", getMilitaryTimeUTC(Long.parseLong(weatherResponse.sys.sunset))));
 
 		} else {
-			pairList.add(new AbstractMap.SimpleEntry<>("Weather:", weatherResponse.weather[0].main + " ~ " + weatherResponse.weather[0].description));
-			pairList.add(new AbstractMap.SimpleEntry<>("Temperature:", weatherResponse.main.temp + " " + unitStandard.temp));
-			pairList.add(new AbstractMap.SimpleEntry<>("Wind speed:", weatherResponse.wind.speed + " " + unitStandard.speed));
-			pairList.add(new AbstractMap.SimpleEntry<>("Humidity:", weatherResponse.main.humidity + "%"));
+			pairList.add(new TableKeyValuePair<>("Weather:", weatherResponse.weather[0].main + " ~ " + weatherResponse.weather[0].description));
+			pairList.add(new TableKeyValuePair<>("Temperature:", weatherResponse.main.temp + " " + unitStandard.temp));
+			pairList.add(new TableKeyValuePair<>("Wind speed:", weatherResponse.wind.speed + " " + unitStandard.speed));
+			pairList.add(new TableKeyValuePair<>("Humidity:", weatherResponse.main.humidity + "%"));
 		}
 
 		displayTable(pairList);
@@ -178,14 +196,17 @@ class ConsoleIO {
 	 *	@param weatherResponse - the weather response received from the request to OpenWeather with the ISS coordinates.
 	 */
 	void printSpaceResponse(SpaceResponse spaceResponse, WeatherResponse weatherResponse){
-		List<String> params = new ArrayList<>(Arrays.asList("Latitude", "Longitude", "Currently above"));
-		List<String> values = new ArrayList<>(Arrays.asList(
-			spaceResponse.iss_position.latitude,
-			spaceResponse.iss_position.longitude,
-			(weatherResponse.sys.country == null)
-			? "(not above any country)" : weatherResponse.name + ", " + weatherResponse.sys.country
-		));
-		displayTable(params, values);
+		List<TableKeyValuePair<String, String>> pairList = new ArrayList<>();
+
+		pairList.add(new TableKeyValuePair<>("Latitude:", spaceResponse.iss_position.latitude));
+		pairList.add(new TableKeyValuePair<>("Longitude:", spaceResponse.iss_position.longitude));
+		if (weatherResponse.sys.country != null){
+			pairList.add(new TableKeyValuePair<>("Currently above:", weatherResponse.name + ", " + weatherResponse.sys.country));
+		} else {
+			pairList.add(new TableKeyValuePair<>("Currently above:", "(not above any country)"));
+		}
+
+		displayTable(pairList);
 	}
 
 
@@ -195,27 +216,17 @@ class ConsoleIO {
 	 *	@param cryptoResponse - the weather response received from the request to CoinAPI.
 	 */
 	void printCryptoResponse(CryptoResponse cryptoResponse){
-		List<String> params = new ArrayList<>(Arrays.asList("Name", "ID", "Price"));
-		List<String> values = new ArrayList<>(Arrays.asList(
-			cryptoResponse.name,
-			cryptoResponse.asset_id,
-			(cryptoResponse.price_usd == null)
-				? "(no price data found)" : String.format("$%,.2f", Float.parseFloat(cryptoResponse.price_usd))
-		));
-		displayTable(params, values);
-	}
+		List<TableKeyValuePair<String, String>> pairList = new ArrayList<>();
 
+		pairList.add(new TableKeyValuePair<>("Name:", cryptoResponse.name));
+		pairList.add(new TableKeyValuePair<>("ID:", cryptoResponse.asset_id));
+		if (cryptoResponse.price_usd != null){
+			pairList.add(new TableKeyValuePair<>("Price:", String.format("$%,.2f", Float.parseFloat(cryptoResponse.price_usd))));
+		} else {
+			pairList.add(new TableKeyValuePair<>("Price:", "(no price data found)"));
+		}
 
-
-	/**
-	 * Gets the width of the widest string in an array.
-	 * @param strings - An array of strings.
-	 * @return int representing the width of the widest string in the array.
-	 */
-	private int getWidth(List<String> strings){
-		int widest = 0;
-		for (String s : strings) widest = Math.max(s.length(), widest);
-		return widest;
+		displayTable(pairList);
 	}
 
 
@@ -224,10 +235,10 @@ class ConsoleIO {
 	 * Prints key-value pairs of data out to the command line in table format.
 	 * @param pairList - List of pairs representing the 2 columns of each row.
 	 */
-	private void displayTable(List<AbstractMap.SimpleEntry<String, String>> pairList){
+	private void displayTable(List<TableKeyValuePair<String, String>> pairList){
 		int widestKey = 0, widestValue = 0;
 		// find the widest string in each column
-		for (AbstractMap.SimpleEntry<String,String> entry : pairList){
+		for (TableKeyValuePair<String,String> entry : pairList){
 			widestKey = Math.max(entry.getKey().length(), widestKey);
 			widestValue = Math.max(entry.getValue().length(), widestValue);
 		}
@@ -242,33 +253,24 @@ class ConsoleIO {
 		String format = "| %" + widestKey + "s  |  %-" + widestValue + "s |\n"; // table row format
 
 		System.out.println(line);
-		for (AbstractMap.SimpleEntry<String,String> entry : pairList){
+		for (TableKeyValuePair<String,String> entry : pairList){
 			System.out.printf(format, entry.getKey(), entry.getValue()); // print row
 		}
 		System.out.println(line);
 	}
 
-
-	private void displayTable(List<String> params, List<String> values){
-		int widestParam = getWidth(params);
-		int widestValue = getWidth(values);
-		int lineWidth = widestParam + widestValue + 10;
-
-		// char array to store the horizontal lines of the table
-		char[] line = new char[lineWidth];
-		line[0] = ' ';
-		Arrays.fill(line, 1, lineWidth-1, '-');
-		line[lineWidth-1] = ' ';
-
-		String format = "| %" + widestParam + "s  |  %-" + widestValue + "s |\n"; // table row format
-
-		System.out.println(line);
-		for (int i = 0; i < params.size(); ++i){
-			System.out.printf(format, params.get(i), values.get(i)); // print row
-		}
-		System.out.println(line);
+	/**
+	 * Returns the formatted military time (UTC) from a given unix timestamp.
+	 * @param unixTime - the unix timestamp to format.
+	 * @return A string of the formatted time in UTC.
+	 */
+	private String getMilitaryTimeUTC(long unixTime){
+		final String timezone = "UTC";
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+		return Instant.ofEpochSecond(unixTime)
+				.atZone(ZoneId.of(timezone))
+				.format(formatter) + " " + timezone;
 	}
-
 
 }
 

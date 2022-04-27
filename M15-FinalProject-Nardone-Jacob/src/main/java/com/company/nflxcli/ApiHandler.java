@@ -29,9 +29,7 @@ class ApiHandler {
 
 	// Methods
 
-	/**
-	 * Constructor
-	 */
+	/** Constructor */
 	public ApiHandler(){
 		warmup();
 	}
@@ -157,11 +155,14 @@ class ApiHandler {
 
 
 	/**
-	 * Makes a random API call to skip the cold start before the user's first request.
+	 * Makes random API calls to skip the cold start before the user's first request.
 	 */
 	private void warmup(){
-		try { getLocationISS(); }
-		catch (WebClientResponseException ignored) { }
+		try {
+			getLocationISS();
+			getWeatherInCity("London", UnitStandard.imperialStandard.name);
+			getCryptoData("BTC");
+		} catch (WebClientResponseException | BadRequestException ignored) { }
 	}
 
 

@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 /**
- * 
  * The OpenWeather weather info response class.
- * 
  */
 public class WeatherResponse {
 

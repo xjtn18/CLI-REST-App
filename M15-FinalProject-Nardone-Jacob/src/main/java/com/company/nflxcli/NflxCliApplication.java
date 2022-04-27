@@ -20,9 +20,7 @@ public class NflxCliApplication {
 
 	// Methods
 
-	/**
-	 * Constructor
-	 */
+	/** Constructor */
 	NflxCliApplication(){
 		consoleIO = new ConsoleIO();
 		apiHandler = new ApiHandler();

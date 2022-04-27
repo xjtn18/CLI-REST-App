@@ -2,9 +2,7 @@ package com.company.nflxcli.response;
 
 
 /**
- * 
  * The OpenNotify ISS info response class.
- * 
  */
 public class SpaceResponse {
 

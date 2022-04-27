@@ -12,9 +12,7 @@ class UnitStandard {
 
 	// Methods
 
-	/**
-	 * Constructor
-	 */
+	/** Constructor */
 	UnitStandard(String _name, String _speed, String _temp){
 		name = _name;
 		speed = _speed;
