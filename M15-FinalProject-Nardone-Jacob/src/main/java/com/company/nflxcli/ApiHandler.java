@@ -37,23 +37,23 @@ class ApiHandler {
 
 
 	/**
-	 * Gets the response object of the type specified by the 'ResponseType'.
+	 * Gets the response object of the type specified by 'ResponseType'.
 	 * 
 	 * @param uri - URI of the API request.
-	 * @param responseClass - The '.class' of whatever response object type we want.
-	 * @return The custom response object.
+	 * @param responseClass - The '.class' of whatever response object we want.
+	 * @return Our custom response object.
 	 */
 	private <ResponseType> ResponseType request(String uri, Class<ResponseType> responseClass){
 		// create the connection to the resource
 		WebClient client = WebClient.create(uri);
 
-		// get the Mono response
+		// grab the response and put it into a Mono instance
 		Mono<ResponseType> responseMono = client
 			.get()
 			.retrieve()
 			.bodyToMono(responseClass);
 
-		// map the response into our custom response object and return it
+		// get our custom response object from Mono and return it
 		return responseMono.share().block();
 	}
 
@@ -65,7 +65,7 @@ class ApiHandler {
 	 * @param units - The unit standard we want our response to use.
 	 * @return A weather response object.
 	 */
-	WeatherResponse getWeatherInCity(String cityName, String units){
+	public WeatherResponse getWeatherInCity(String cityName, String units){
 		String uri = getWeatherUriBuilder(units)
 			.queryParam("q", cityName)
 			.build().toUriString();
@@ -82,7 +82,7 @@ class ApiHandler {
 	 * @param units - The unit standard we want our response to use.
 	 * @return A weather response object.
 	 */
-	WeatherResponse getWeatherAtCoordinates(String latitude, String longitude, String units){
+	public WeatherResponse getWeatherAtCoordinates(String latitude, String longitude, String units){
 		String uri = getWeatherUriBuilder(units)
 			.queryParam("lat", latitude)
 			.queryParam("lon", longitude)
@@ -96,7 +96,7 @@ class ApiHandler {
 	/**
 	 * Returns the space response of the ISS.
 	 */
-	SpaceResponse getLocationISS(){
+	public SpaceResponse getLocationISS(){
 		return request("http://api.open-notify.org/iss-now.json", SpaceResponse.class);
 	}
 
@@ -108,15 +108,15 @@ class ApiHandler {
 	 * @return A crypto response object.
 	 * @throws BadRequestException - if an unknown asset ID was queried through the coin API.
 	 */
-	CryptoResponse getCryptoData(String assetID) throws BadRequestException {
-		// Empty asset path causes a WebClientException but with HTTP error code 200... catching it early here.
-		if (Objects.equals(assetID, "")) throw new BadRequestException("Empty asset ID was queried.");
+	public CryptoResponse getCryptoData(String assetID) throws BadRequestException {
+		// Empty asset path causes a WebClientException but with HTTP error code 200... diverting it early here.
+		if (assetID.equals("")) throw new BadRequestException("Empty asset ID was queried.");
 
 		String uri = getCryptoUriBuilder()
 			.path(assetID)
 			.build().toUriString();
 
-		// @NOTE: CoinApi returns json wrapped entirely in a single array
+		// @NOTE: CoinApi returns JSON wrapped entirely in a single array
 		CryptoResponse[] cryptoResponse = request(uri, CryptoResponse[].class);
 
 		if (cryptoResponse.length == 0){

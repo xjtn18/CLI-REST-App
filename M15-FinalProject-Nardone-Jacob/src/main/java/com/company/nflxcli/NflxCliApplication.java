@@ -1,6 +1,7 @@
 package com.company.nflxcli;
 
 import com.company.nflxcli.response.*;
+import com.company.nflxcli.io.ConsoleIO;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,8 +10,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 
 
-@SpringBootApplication
-public class NflxCliApplication {
+class App {
 
 	// Attributes
 	private final ConsoleIO consoleIO;
@@ -21,7 +21,7 @@ public class NflxCliApplication {
 	// Methods
 
 	/** Constructor */
-	NflxCliApplication(){
+	public App(){
 		consoleIO = new ConsoleIO();
 		apiHandler = new ApiHandler();
 		unitStandard = UnitStandard.imperialStandard; // initialize to 'imperial' units
@@ -33,11 +33,10 @@ public class NflxCliApplication {
 	 * Runs the settings menu loop.
 	 * Loop ends when the user selects the 'back' option.
 	 */
-	void settingsMenuLoop(){
+	public void settingsMenuLoop(){
 		boolean looping = true;
 
 		while (looping){
-			consoleIO.clearConsole();
 			consoleIO.printSettingsMenu(unitStandard); 
 
 
@@ -62,11 +61,13 @@ public class NflxCliApplication {
 
 			} catch (NumberFormatException nfe){
 				consoleIO.log("\nError: Please enter a number.");
-				consoleIO.promptForInput("\n[press 'Enter' to continue]"); // wait for user to press Enter again before re-prompting.
+				 // wait for user to press Enter again before re-prompting.
+				consoleIO.promptForInput("\n[press 'Enter' to continue]");
 
 			} catch (ConsoleIO.OutOfRangeException ore){
 				consoleIO.log("\nError: " + ore.getMessage());	
-				consoleIO.promptForInput("\n[press 'Enter' to continue]"); // wait for user to press Enter again before re-prompting.
+				 // wait for user to press Enter again before re-prompting.
+				consoleIO.promptForInput("\n[press 'Enter' to continue]");
 			}
 
 		}
@@ -79,7 +80,7 @@ public class NflxCliApplication {
 	 * Runs the main menu loop.
 	 * Loop ends when user selects the 'quit' option.
 	 */
-	void mainMenuLoop() {
+	public void mainMenuLoop() {
 		boolean looping = true;
 
 		// Main program command loop
@@ -87,7 +88,6 @@ public class NflxCliApplication {
 			boolean backedOutSubMenu = false;
 
 			// display menu options to the user
-			consoleIO.clearConsole();
 			consoleIO.printMainMenu();
 
 			try {
@@ -174,6 +174,8 @@ public class NflxCliApplication {
 					consoleIO.log("\nError: Invalid or unknown query.");
 				} else if (statusCode >= 500 && statusCode < 600){
 					consoleIO.log("\nServer error occurred. Please try again later.");
+				} else {
+					consoleIO.log("\nError: Unknown network error.");
 				}
 
 			} catch (Exception e){
@@ -182,13 +184,18 @@ public class NflxCliApplication {
 			}
 
 			if (looping && !backedOutSubMenu){
-				consoleIO.promptForInput("\n[press 'Enter' to continue]"); // wait for user to press Enter again before re-prompting.
+				 // wait for user to press Enter again before re-prompting.
+				consoleIO.promptForInput("\n[press 'Enter' to continue]");
 			}
 
 		}
 	}
 
+}
 
+
+@SpringBootApplication
+public class NflxCliApplication {
 
 	/**
 	 * Instantiate the application class and start it.
@@ -197,9 +204,12 @@ public class NflxCliApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(NflxCliApplication.class, args);
 
-		new NflxCliApplication().mainMenuLoop(); // start the program
+		new App().mainMenuLoop(); // start the program
 		System.exit(0);
 	}
 
 }
+
+
+
 
