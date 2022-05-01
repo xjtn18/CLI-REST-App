@@ -1,7 +1,8 @@
 package com.company.nflxcli;
 
+import com.company.nflxcli.api.*;
 import com.company.nflxcli.response.*;
-import com.company.nflxcli.io.ConsoleIO;
+import com.company.nflxcli.io.*;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,7 +16,7 @@ class App {
 	// Attributes
 	private final ConsoleIO consoleIO;
 	private final ApiHandler apiHandler;
-	private UnitStandard unitStandard;
+	private UnitSystem unitStandard;
 
 
 	// Methods
@@ -24,7 +25,7 @@ class App {
 	public App(){
 		consoleIO = new ConsoleIO();
 		apiHandler = new ApiHandler();
-		unitStandard = UnitStandard.imperialStandard; // initialize to 'imperial' units
+		unitStandard = UnitSystem.IMPERIAL; // initialize to 'imperial' units
 	}
 
 
@@ -39,7 +40,6 @@ class App {
 		while (looping){
 			consoleIO.printSettingsMenu(unitStandard); 
 
-
 			try {
 				int choice = consoleIO.promptForNumberInRange("\nEnter a number to toggle a setting:", 0, 2);
 
@@ -48,9 +48,9 @@ class App {
 						looping = false;
 						break;
 
-					} case 1: { // Change unit standard
-						unitStandard = (unitStandard == UnitStandard.imperialStandard)
-							? UnitStandard.metricStandard : UnitStandard.imperialStandard;
+					} case 1: { // Swap unit standard
+						unitStandard = (unitStandard == UnitSystem.IMPERIAL)
+							? UnitSystem.METRIC : UnitSystem.IMPERIAL;
 						break;
 
 					} case 2: { // Change verbosity
@@ -64,7 +64,7 @@ class App {
 				 // wait for user to press Enter again before re-prompting.
 				consoleIO.promptForInput("\n[press 'Enter' to continue]");
 
-			} catch (ConsoleIO.OutOfRangeException ore){
+			} catch (InputOutOfRangeException ore){
 				consoleIO.log("\nError: " + ore.getMessage());	
 				 // wait for user to press Enter again before re-prompting.
 				consoleIO.promptForInput("\n[press 'Enter' to continue]");
@@ -165,7 +165,7 @@ class App {
 			} catch (NumberFormatException e){
 				consoleIO.log("\nError: Please enter a number.");
 
-			} catch (ConsoleIO.OutOfRangeException | ApiHandler.BadRequestException e){
+			} catch (InputOutOfRangeException | BadRequestException e){
 				consoleIO.log("\nError: " + e.getMessage());
 
 			} catch (WebClientResponseException e){

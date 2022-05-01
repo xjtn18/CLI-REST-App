@@ -1,7 +1,7 @@
 package com.company.nflxcli.io;
 
 import com.company.nflxcli.response.*;
-import com.company.nflxcli.UnitStandard;
+import com.company.nflxcli.UnitSystem;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -15,16 +15,8 @@ import java.util.Scanner;
  */ 
 public class ConsoleIO {
 
-
-	// Custom exception class for number inputs from the user that are outside the range of possible values.
-	public static class OutOfRangeException extends Exception {
-		public OutOfRangeException(String msg){ super(msg); }
-	}
-
-
 	// Attributes
 	private final Scanner scanner;
-	private final Table table;
 	private boolean verbose;
 
 
@@ -34,7 +26,6 @@ public class ConsoleIO {
 	/** Constructor */
 	public ConsoleIO(){
 		scanner = new Scanner(System.in); // allocate the scanner for user input
-		table = new Table();
 		verbose = false; // initially set verbose to 'false'
 	}
 
@@ -67,13 +58,13 @@ public class ConsoleIO {
 	 * @param start - Start of the valid range
 	 * @param end - End of the valid range
 	 * @return int representing the user's choice
-	 * @throws OutOfRangeException - if the user doesn't provide a number within the given range
+	 * @throws InputOutOfRangeException - if the user doesn't provide a number within the given range
 	 */
-	public int promptForNumberInRange(String prompt, int start, int end) throws OutOfRangeException {
+	public int promptForNumberInRange(String prompt, int start, int end) {
 		int choice = Integer.parseInt(promptForInput(prompt)); // grab input from command line, convert to int
 
 		if (choice < start || choice > end){
-			throw new OutOfRangeException(
+			throw new InputOutOfRangeException(
 				String.format("Please enter a number between %d and %d inclusive.", start, end)
 			);
 		}
@@ -110,12 +101,12 @@ public class ConsoleIO {
 	/**
 	 * Prints the settings menu of the options that the user can choose from.
 	 */
-	public void printSettingsMenu(UnitStandard unitStandard){
+	public void printSettingsMenu(UnitSystem unitSystem){
 		log("\n\n-----------------------------------------------------------");
 		log("[0] << Back");
 
-		String optionImperial = (unitStandard == UnitStandard.imperialStandard) ? "(imperial)" : " imperial ";
-		String optionMetric = (unitStandard == UnitStandard.metricStandard) ? "(metric)" : " metric";
+		String optionImperial = (unitSystem == UnitSystem.IMPERIAL) ? "(imperial)" : " imperial ";
+		String optionMetric = (unitSystem == UnitSystem.METRIC) ? "(metric)" : " metric";
 		log("[1] " + optionImperial + " : " + optionMetric);
 
 		String optionBrief = (!verbose) ? "  (brief) " : "   brief  ";
@@ -128,17 +119,17 @@ public class ConsoleIO {
 	/**
 	 * Prints the weather data of the given weather response.
 	 *	@param weatherResponse - the weather response received from the request to OpenWeather.
-	 *	@param unitStandard - the unit standard used for displaying measurements.
+	 *	@param unitSystem - the unit standard used for displaying measurements.
 	 */
-	public void printWeatherResponse(WeatherResponse weatherResponse, UnitStandard unitStandard){
-		table.clear();
+	public void printWeatherResponse(WeatherResponse weatherResponse, UnitSystem unitSystem){
+		DisplayTable table = new DisplayTable();
 
 		if (verbose){
 			table.add("Weather:", weatherResponse.weather[0].main + " ~ " + weatherResponse.weather[0].description);
-			table.add("Temperature:", weatherResponse.main.temp + " " + unitStandard.temp);
-			table.add("Temperature min:", weatherResponse.main.temp_min + " " + unitStandard.temp);
-			table.add("Temperature max:", weatherResponse.main.temp_max + " " + unitStandard.temp);
-			table.add("Feels like:", weatherResponse.main.feels_like + " " + unitStandard.temp);
+			table.add("Temperature:", weatherResponse.main.temp + " " + unitSystem.temp);
+			table.add("Temperature min:", weatherResponse.main.temp_min + " " + unitSystem.temp);
+			table.add("Temperature max:", weatherResponse.main.temp_max + " " + unitSystem.temp);
+			table.add("Feels like:", weatherResponse.main.feels_like + " " + unitSystem.temp);
 			if (weatherResponse.rain != null){
 				if (weatherResponse.rain._1h != null) table.add("Rainfall last hour:", weatherResponse.rain._1h + " mm");
 				if (weatherResponse.rain._3h != null) table.add("Rainfall last 3 hours:", weatherResponse.rain._3h + " mm");
@@ -149,9 +140,9 @@ public class ConsoleIO {
 			}
 			table.add("Humidity:", weatherResponse.main.humidity + "%");
 			table.add("Cloudiness:", weatherResponse.clouds.all + "%");
-			table.add("Wind speed:", weatherResponse.wind.speed + " " + unitStandard.speed);
+			table.add("Wind speed:", weatherResponse.wind.speed + " " + unitSystem.speed);
 			if (weatherResponse.wind.gust != null){
-				table.add("Gust:", weatherResponse.wind.gust + " " + unitStandard.speed);
+				table.add("Gust:", weatherResponse.wind.gust + " " + unitSystem.speed);
 			}
 			table.add("Direction:", weatherResponse.wind.deg + "°");
 			table.add("Pressure:", weatherResponse.main.pressure + " hPa");
@@ -162,8 +153,8 @@ public class ConsoleIO {
 
 		} else {
 			table.add("Weather:", weatherResponse.weather[0].main + " ~ " + weatherResponse.weather[0].description);
-			table.add("Temperature:", weatherResponse.main.temp + " " + unitStandard.temp);
-			table.add("Wind speed:", weatherResponse.wind.speed + " " + unitStandard.speed);
+			table.add("Temperature:", weatherResponse.main.temp + " " + unitSystem.temp);
+			table.add("Wind speed:", weatherResponse.wind.speed + " " + unitSystem.speed);
 			table.add("Humidity:", weatherResponse.main.humidity + "%");
 		}
 
@@ -178,7 +169,7 @@ public class ConsoleIO {
 	 *	@param weatherResponse - the weather response received from the request to OpenWeather with the ISS coordinates.
 	 */
 	public void printSpaceResponse(SpaceResponse spaceResponse, WeatherResponse weatherResponse){
-		table.clear();
+		DisplayTable table = new DisplayTable();
 
 		table.add("Latitude:", spaceResponse.iss_position.latitude);
 		table.add("Longitude:", spaceResponse.iss_position.longitude);
@@ -198,7 +189,7 @@ public class ConsoleIO {
 	 *	@param cryptoResponse - the weather response received from the request to CoinAPI.
 	 */
 	public void printCryptoResponse(CryptoResponse cryptoResponse){
-		table.clear();
+		DisplayTable table = new DisplayTable();
 
 		table.add("Name:", cryptoResponse.name);
 		table.add("ID:", cryptoResponse.asset_id);

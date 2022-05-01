@@ -8,20 +8,20 @@ import java.util.Arrays;
 /**
  * A class for managing a 2-column table of strings that can print to console.
  */
-class Table {
+class DisplayTable {
 
-	// Simple class for storing a pair of objects; used for the display tables.
-	private static class KeyValuePair <KeyType, ValueType> {
-		private final KeyType key;
-		private final ValueType value;
+	// Simple class for storing a key-value pair
+	private static class KeyValuePair <K, V> {
+		private final K key;
+		private final V value;
 
-		public KeyValuePair(KeyType key, ValueType value){
+		public KeyValuePair(K key, V value){
 			this.key = key;
 			this.value = value;
 		}
 
-		public KeyType getKey(){ return key; }
-		public ValueType getValue(){ return value; }
+		public K getKey(){ return key; }
+		public V getValue(){ return value; }
 	}
 
 
@@ -32,7 +32,7 @@ class Table {
 	// Methods
 
 	/** Constructor */
-	Table(){
+	DisplayTable(){
 		rows = new ArrayList<>();
 	}
 
@@ -50,16 +50,7 @@ class Table {
 
 
 	/**
-	 * Removes all elements currently in the 'rows' list.
-	 */
-	void clear(){
-		rows.clear();
-	}
-
-
-
-	/**
-	 * Prints the table to the command line
+	 * Prints the table to the console
 	 */
 	void print(){
 		int widestKey = 0, widestValue = 0;

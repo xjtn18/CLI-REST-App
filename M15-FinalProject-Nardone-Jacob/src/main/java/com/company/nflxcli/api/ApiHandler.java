@@ -1,5 +1,6 @@
-package com.company.nflxcli;
+package com.company.nflxcli.api;
 
+import com.company.nflxcli.UnitSystem;
 import com.company.nflxcli.response.*;
 
 import org.springframework.web.reactive.function.client.WebClient;
@@ -7,19 +8,12 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
-import java.util.Objects;
 
 
 /**
  * Handles the program's API requests.
  */ 
-class ApiHandler {
-
-	// Custom exception for throwing in special scenarios of bad API requests.
-	public static class BadRequestException extends Exception {
-		public BadRequestException(String msg){ super(msg); }
-	}
-
+public class ApiHandler {
 
 	// Attributes
 	private static final String weatherApiKey = "df5cfd59a9d48cfb1c016a0ae7d1ffef";
@@ -37,18 +31,18 @@ class ApiHandler {
 
 
 	/**
-	 * Gets the response object of the type specified by 'ResponseType'.
-	 * 
+	 * Gets the response object from a given API request.
+	 * @param <T> The custom response type.
 	 * @param uri - URI of the API request.
 	 * @param responseClass - The '.class' of whatever response object we want.
 	 * @return Our custom response object.
 	 */
-	private <ResponseType> ResponseType request(String uri, Class<ResponseType> responseClass){
+	private <T> T request(String uri, Class<T> responseClass){
 		// create the connection to the resource
 		WebClient client = WebClient.create(uri);
 
 		// grab the response and put it into a Mono instance
-		Mono<ResponseType> responseMono = client
+		Mono<T> responseMono = client
 			.get()
 			.retrieve()
 			.bodyToMono(responseClass);
@@ -108,8 +102,8 @@ class ApiHandler {
 	 * @return A crypto response object.
 	 * @throws BadRequestException - if an unknown asset ID was queried through the coin API.
 	 */
-	public CryptoResponse getCryptoData(String assetID) throws BadRequestException {
-		// Empty asset path causes a WebClientException but with HTTP error code 200... diverting it early here.
+	public CryptoResponse getCryptoData(String assetID) {
+		// Empty asset ID causes a WebClientException but with HTTP error code 200... diverting it early here.
 		if (assetID.equals("")) throw new BadRequestException("Empty asset ID was queried.");
 
 		String uri = getCryptoUriBuilder()
@@ -120,7 +114,7 @@ class ApiHandler {
 		CryptoResponse[] cryptoResponse = request(uri, CryptoResponse[].class);
 
 		if (cryptoResponse.length == 0){
-			throw new BadRequestException("The API request failed; unknown asset ID was queried.");
+			throw new BadRequestException("The API request was invalid; unknown asset ID was queried.");
 		} else {
 			return cryptoResponse[0];
 		}
@@ -160,7 +154,7 @@ class ApiHandler {
 	private void warmup(){
 		try {
 			getLocationISS();
-			getWeatherInCity("London", UnitStandard.imperialStandard.name);
+			getWeatherInCity("London", UnitSystem.IMPERIAL.name);
 			getCryptoData("BTC");
 		} catch (WebClientResponseException | BadRequestException ignored) { }
 	}
