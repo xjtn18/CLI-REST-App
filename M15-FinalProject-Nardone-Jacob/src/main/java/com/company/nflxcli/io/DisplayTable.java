@@ -59,7 +59,7 @@ class DisplayTable {
 			widestKey = Math.max(row.getKey().length(), widestKey);
 			widestValue = Math.max(row.getValue().length(), widestValue);
 		}
-		int lineWidth = widestKey + widestValue + 10;
+		int lineWidth = widestKey + widestValue + 9;
 
 		// char array to store the horizontal lines of the table
 		char[] line = new char[lineWidth];

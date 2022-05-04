@@ -9,7 +9,7 @@ package com.company.nflxcli;
  */
 public enum UnitSystem {
 
-	// Preset standards
+	// Preset systems
 	IMPERIAL("imperial", "mph", "°F"),
 	METRIC("metric", "m/s", "°C");
 

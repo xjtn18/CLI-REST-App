@@ -16,7 +16,7 @@ class App {
 	// Attributes
 	private final ConsoleIO consoleIO;
 	private final ApiHandler apiHandler;
-	private UnitSystem unitStandard;
+	private UnitSystem unitSystem;
 
 
 	// Methods
@@ -25,7 +25,7 @@ class App {
 	public App(){
 		consoleIO = new ConsoleIO();
 		apiHandler = new ApiHandler();
-		unitStandard = UnitSystem.IMPERIAL; // initialize to 'imperial' units
+		unitSystem = UnitSystem.IMPERIAL; // initialize to 'imperial' units
 	}
 
 
@@ -38,7 +38,7 @@ class App {
 		boolean looping = true;
 
 		while (looping){
-			consoleIO.printSettingsMenu(unitStandard); 
+			consoleIO.printSettingsMenu(unitSystem); 
 
 			try {
 				int choice = consoleIO.promptForNumberInRange("\nEnter a number to toggle a setting:", 0, 2);
@@ -49,7 +49,7 @@ class App {
 						break;
 
 					} case 1: { // Swap unit standard
-						unitStandard = (unitStandard == UnitSystem.IMPERIAL)
+						unitSystem = (unitSystem == UnitSystem.IMPERIAL)
 							? UnitSystem.METRIC : UnitSystem.IMPERIAL;
 						break;
 
@@ -104,14 +104,14 @@ class App {
 						// Get city name from the user
 						WeatherResponse weatherResponse = apiHandler.getWeatherInCity(
 							consoleIO.promptForInput("Please enter a city name:"),
-							unitStandard.name
+							unitSystem.name
 						);
 
 						System.out.printf("\n\n--- Current weather in %s, %s ---\n",
 							weatherResponse.name,
 							weatherResponse.sys.country
 						);
-						consoleIO.printWeatherResponse(weatherResponse, unitStandard);
+						consoleIO.printWeatherResponse(weatherResponse, unitSystem);
 						break;
 
 
@@ -121,7 +121,7 @@ class App {
 						WeatherResponse weatherResponse = apiHandler.getWeatherAtCoordinates(
 							spaceResponse.iss_position.latitude,
 							spaceResponse.iss_position.longitude,
-							unitStandard.name
+							unitSystem.name
 						);
 
 						consoleIO.log("\n\n--- Current ISS location ---");
@@ -134,13 +134,13 @@ class App {
 						WeatherResponse weatherResponse = apiHandler.getWeatherAtCoordinates(
 							spaceResponse.iss_position.latitude,
 							spaceResponse.iss_position.longitude,
-							unitStandard.name
+							unitSystem.name
 						);
 
 						// display ISS location information first, and then the weather at that location
 						consoleIO.log("\n\n--- Current ISS location and weather ---");
 						consoleIO.printSpaceResponse(spaceResponse, weatherResponse);
-						consoleIO.printWeatherResponse(weatherResponse, unitStandard);
+						consoleIO.printWeatherResponse(weatherResponse, unitSystem);
 						break;
 
 

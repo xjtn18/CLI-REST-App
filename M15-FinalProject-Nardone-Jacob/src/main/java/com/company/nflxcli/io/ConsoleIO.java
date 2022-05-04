@@ -3,11 +3,12 @@ package com.company.nflxcli.io;
 import com.company.nflxcli.response.*;
 import com.company.nflxcli.UnitSystem;
 
+import java.util.Scanner;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-import java.util.Scanner;
 
 
 /**

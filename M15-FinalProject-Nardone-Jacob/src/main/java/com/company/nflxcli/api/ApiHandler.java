@@ -111,6 +111,7 @@ public class ApiHandler {
 			.build().toUriString();
 
 		// @NOTE: CoinApi returns JSON wrapped entirely in a single array
+
 		CryptoResponse[] cryptoResponse = request(uri, CryptoResponse[].class);
 
 		if (cryptoResponse.length == 0){
@@ -151,6 +152,7 @@ public class ApiHandler {
 	/**
 	 * Makes random API calls to skip the cold start before the user's first request.
 	 */
+
 	private void warmup(){
 		try {
 			getLocationISS();
